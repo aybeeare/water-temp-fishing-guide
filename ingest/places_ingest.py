@@ -23,8 +23,8 @@ log = logging.getLogger(__name__)
 DB_PATH          = os.environ.get("DB_PATH", "fishing.db")
 API_KEY          = os.environ.get("GOOGLE_PLACES_API_KEY", "")
 MAX_DAILY_CALLS  = int(os.environ.get("DAILY_PLACES_LIMIT", "50"))
-SEARCH_RADIUS_M  = 16000   # 10 miles
-PLACES_URL       = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+SEARCH_RADIUS_M  = 16000.0  # 10 miles
+PLACES_URL       = "https://places.googleapis.com/v1/places:searchText"
 
 # ---------------------------------------------------------------------------
 # Station coordinates — lat/lng for NOAA and major USGS stations.
@@ -170,14 +170,26 @@ def _fetch_from_places(lat: float, lng: float) -> Optional[dict]:
         log.warning("GOOGLE_PLACES_API_KEY not set — skipping bait shop lookup")
         return None
     try:
-        resp = httpx.get(
+        resp = httpx.post(
             PLACES_URL,
-            params={
-                "location":  f"{lat},{lng}",
-                "radius":    SEARCH_RADIUS_M,
-                "keyword":   "bait tackle fishing shop",
-                "type":      "store",
-                "key":       API_KEY,
+            headers={
+                "X-Goog-Api-Key":   API_KEY,
+                "X-Goog-FieldMask": (
+                    "places.displayName,"
+                    "places.formattedAddress,"
+                    "places.rating,"
+                    "places.currentOpeningHours.openNow"
+                ),
+            },
+            json={
+                "textQuery": "bait tackle fishing shop",
+                "locationBias": {
+                    "circle": {
+                        "center": {"latitude": lat, "longitude": lng},
+                        "radius": SEARCH_RADIUS_M,
+                    }
+                },
+                "maxResultCount": 5,
             },
             timeout=5,
         )
@@ -186,17 +198,17 @@ def _fetch_from_places(lat: float, lng: float) -> Optional[dict]:
         log.warning("Google Places request failed: %s", exc)
         return None
 
-    results = data.get("results", [])
+    results = data.get("places", [])
     if not results:
         return None
 
     top = results[0]
-    hours = top.get("opening_hours", {})
+    hours = top.get("currentOpeningHours", {})
     return {
-        "name":     top.get("name"),
-        "address":  top.get("vicinity"),
+        "name":     top.get("displayName", {}).get("text"),
+        "address":  top.get("formattedAddress"),
         "rating":   top.get("rating"),
-        "open_now": hours.get("open_now"),
+        "open_now": hours.get("openNow"),
     }
 
 

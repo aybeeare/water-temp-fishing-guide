@@ -1,10 +1,12 @@
 """Unit tests for ingest/usgs_ingest.py"""
+import os
 import sqlite3
 from datetime import datetime, timezone, timedelta
 
 import pytest
 from pytest_httpx import HTTPXMock
 
+import ingest.usgs_ingest as usgs_mod
 from ingest.usgs_ingest import (
     celsius_to_fahrenheit,
     parse_usgs_response,
@@ -172,3 +174,47 @@ def test_upsert_cache_overwrites(db_path):
     row = conn.execute("SELECT temp_f FROM water_cache WHERE site_id = '07010000'").fetchone()
     conn.close()
     assert row["temp_f"] == pytest.approx(72.0, abs=0.01)
+
+
+# ---------------------------------------------------------------------------
+# Live API integration
+# ---------------------------------------------------------------------------
+
+# Potomac River at DC — reliable year-round gauge
+LIVE_SITE_ID = "01646500"
+
+
+@pytest.mark.integration
+def test_usgs_api_key_is_set():
+    assert os.environ.get("USGS_API_KEY"), (
+        "USGS_API_KEY is not set — export it before running integration tests"
+    )
+
+
+@pytest.mark.integration
+def test_fetch_usgs_live_returns_data(monkeypatch):
+    """Live call to USGS IV API returns a parseable response for a known gauge."""
+    monkeypatch.setattr(usgs_mod, "USGS_API_KEY", os.environ.get("USGS_API_KEY", "DEMO_KEY"))
+
+    data = fetch_usgs([LIVE_SITE_ID])
+
+    assert data is not None, "fetch_usgs returned None — check API key or network"
+    assert "value" in data
+    assert "timeSeries" in data["value"]
+    assert len(data["value"]["timeSeries"]) > 0
+
+
+@pytest.mark.integration
+def test_usgs_live_parse_gives_temperature(monkeypatch):
+    """Live data parses to a valid temperature reading (not offline sensor)."""
+    monkeypatch.setattr(usgs_mod, "USGS_API_KEY", os.environ.get("USGS_API_KEY", "DEMO_KEY"))
+
+    data = fetch_usgs([LIVE_SITE_ID])
+    assert data is not None
+
+    results = parse_usgs_response(data)
+    assert len(results) == 1
+    r = results[0]
+    assert r["site_id"] == LIVE_SITE_ID
+    assert r["temp_f"] is not None, "Sensor may be offline; try a different LIVE_SITE_ID"
+    assert 32 <= r["temp_f"] <= 100, f"Temperature {r['temp_f']}°F outside plausible range"

@@ -40,6 +40,7 @@ app = FastAPI(title="Fishing Water Temp — Alexa+ AI Action API", version="1.2.
 
 DB_PATH                = os.environ.get("DB_PATH", "fishing.db")
 ASSOCIATES_TRACKING_ID = os.environ.get("ASSOCIATES_TRACKING_ID", "yourstore-20")
+ENABLE_BAIT_SHOP       = os.environ.get("ENABLE_BAIT_SHOP", "true").lower() == "true"
 
 # Build a quick lookup: noaa station_id → display_name
 NOAA_STATION_NAMES = {sid: name for sid, name in NOAA_STATIONS}
@@ -374,7 +375,7 @@ async def fishing_guide(
         build_shopping_directive(logic["secondary_asin"])
         if logic and logic["secondary_asin"] else None
     )
-    nearby_shop         = lookup_bait_shop(resolved_id)
+    nearby_shop         = lookup_bait_shop(resolved_id) if ENABLE_BAIT_SHOP else None
     spoken              = build_spoken_response(
         site_name, temp_f, temp_c, logic, tide_rows, sponsor_script, species_list,
         shop=nearby_shop,
