@@ -1,0 +1,111 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "angelführer",
+      "intents": [
+        {
+          "name": "GetFishingGuideIntent",
+          "slots": [
+            { "name": "WaterBody", "type": "WATER_BODY" }
+          ],
+          "samples": [
+            "wie ist die Wassertemperatur bei {WaterBody}",
+            "Wassertemperatur bei {WaterBody}",
+            "wie warm ist {WaterBody}",
+            "wie kalt ist {WaterBody}",
+            "Angelführer für {WaterBody}",
+            "welche Fische sind aktiv in {WaterBody}",
+            "welche Fische kann ich in {WaterBody} fangen",
+            "was beißt in {WaterBody}",
+            "Angelbericht für {WaterBody}",
+            "{WaterBody} Wassertemperatur",
+            "Angelbedingungen bei {WaterBody}"
+          ]
+        },
+        {
+          "name": "GetFishSpeciesIntent",
+          "slots": [
+            { "name": "WaterBody", "type": "WATER_BODY" }
+          ],
+          "samples": [
+            "welche Fische leben in {WaterBody}",
+            "welche Fische gibt es in {WaterBody}",
+            "welche Arten leben in {WaterBody}",
+            "welche Fischarten in {WaterBody}",
+            "Fischarten in {WaterBody}",
+            "{WaterBody} Fischarten",
+            "liste die Fische in {WaterBody} auf"
+          ]
+        },
+        {
+          "name": "ChoiceIntent",
+          "slots": [
+            { "name": "Choice", "type": "AMAZON.NUMBER" }
+          ],
+          "samples": [
+            "{Choice}",
+            "Nummer {Choice}",
+            "Option {Choice}",
+            "die {Choice}",
+            "ich möchte {Choice}",
+            "ich wähle {Choice}"
+          ]
+        },
+        { "name": "AMAZON.HelpIntent",         "samples": [] },
+        { "name": "AMAZON.CancelIntent",        "samples": [] },
+        { "name": "AMAZON.StopIntent",          "samples": [] },
+        { "name": "AMAZON.FallbackIntent",      "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent",  "samples": [] }
+      ],
+      "types": [
+        {
+          "name": "WATER_BODY",
+          "values": [
+            { "name": { "value": "Michigansee",          "synonyms": ["Lake Michigan"] } },
+            { "name": { "value": "Oberer See",           "synonyms": ["Lake Superior"] } },
+            { "name": { "value": "Eriesee",              "synonyms": ["Lake Erie"] } },
+            { "name": { "value": "Ontariosee",           "synonyms": ["Lake Ontario"] } },
+            { "name": { "value": "Huronsee",             "synonyms": ["Lake Huron"] } },
+            { "name": { "value": "Tahoe-See",            "synonyms": ["Lake Tahoe"] } },
+            { "name": { "value": "Mississippi",          "synonyms": ["Mississippi River", "der Mississippi"] } },
+            { "name": { "value": "Colorado",             "synonyms": ["Colorado River", "der Colorado"] } },
+            { "name": { "value": "Missouri",             "synonyms": ["Missouri River"] } },
+            { "name": { "value": "Golf von Mexiko",      "synonyms": ["Gulf of Mexico"] } },
+            { "name": { "value": "Pazifischer Ozean",   "synonyms": ["Pacific Ocean", "der Pazifik"] } },
+            { "name": { "value": "Atlantischer Ozean",  "synonyms": ["Atlantic Ocean", "der Atlantik"] } },
+            { "name": { "value": "Karibisches Meer",    "synonyms": ["Caribbean Sea", "die Karibik"] } },
+            { "name": { "value": "Chesapeake Bay" } },
+            { "name": { "value": "Hudsonbai",            "synonyms": ["Hudson Bay"] } },
+            { "name": { "value": "Fundy-Bucht",          "synonyms": ["Bay of Fundy"] } },
+            { "name": { "value": "Nordsee",              "synonyms": ["North Sea"] } },
+            { "name": { "value": "Ostsee",               "synonyms": ["Baltic Sea"] } },
+            { "name": { "value": "Norwegische See",      "synonyms": ["Norwegian Sea"] } },
+            { "name": { "value": "Ärmelkanal",           "synonyms": ["English Channel"] } },
+            { "name": { "value": "Irische See",          "synonyms": ["Irish Sea"] } },
+            { "name": { "value": "Golf von Biskaya",     "synonyms": ["Bay of Biscay"] } },
+            { "name": { "value": "Adria",                "synonyms": ["Adriatic Sea"] } },
+            { "name": { "value": "Mittelmeer",           "synonyms": ["Mediterranean Sea", "das Mittelmeer"] } },
+            { "name": { "value": "Schwarzes Meer",       "synonyms": ["Black Sea"] } },
+            { "name": { "value": "Rhein",                "synonyms": ["Rhine River", "der Rhein"] } },
+            { "name": { "value": "Donau",                "synonyms": ["Danube River", "die Donau"] } },
+            { "name": { "value": "Themse",               "synonyms": ["Thames River", "die Themse"] } },
+            { "name": { "value": "Loire",                "synonyms": ["Loire River", "die Loire"] } },
+            { "name": { "value": "Wolga",                "synonyms": ["Volga River", "die Wolga"] } },
+            { "name": { "value": "Ladogasee",            "synonyms": ["Lake Ladoga"] } },
+            { "name": { "value": "Genfer See",           "synonyms": ["Lake Geneva", "Lac Léman"] } },
+            { "name": { "value": "Bodensee",             "synonyms": ["Lake Constance"] } },
+            { "name": { "value": "Comer See",            "synonyms": ["Lake Como"] } },
+            { "name": { "value": "Gardasee",             "synonyms": ["Lake Garda"] } },
+            { "name": { "value": "Loch Ness" } },
+            { "name": { "value": "Loch Lomond" } },
+            { "name": { "value": "Amazonas",             "synonyms": ["Amazon River", "der Amazonas"] } },
+            { "name": { "value": "Rio Negro" } },
+            { "name": { "value": "Paraná",               "synonyms": ["Parana River", "der Paraná"] } },
+            { "name": { "value": "Pantanal" } },
+            { "name": { "value": "Guanabara-Bucht",      "synonyms": ["Guanabara Bay"] } }
+          ]
+        }
+      ]
+    }
+  }
+}

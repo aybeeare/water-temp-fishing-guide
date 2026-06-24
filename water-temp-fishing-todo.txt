@@ -1,0 +1,73 @@
+Primary Items
+
+Product, ASIN
+
+Northland Fishing Tackle Buck-Shot Ice Fishing Rattle Spoon, B0891QB6G9
+TRUSCEND Swim or Jig Fishing Spinner Baits for Freshwater and Saltwater, B08ZMQQF8H
+TRUSCEND Shadtale Easy Catch Soft Fishing Lures with BKK Hooks, B08W2Z6VT8
+Topwater Frog Lure Bass Trout Fishing Lures Kit Set Realistic Prop Frog Soft Swimbait, B091GG71M2
+TRUSCEND Shallow or Deep Diving Crankbait with BKK Hooks, B0FNCZV64V
+Ned-Rig-Kit-Finesse-Baits-Soft-Plastic-Worms-Fising-Lure, B09M3F2PQZ
+Bulk Fishing Hooks Set Worm Catfish Hooks Fish Gear Equipment Supplies, B09R1GQPZK
+Trout Spoons Fishing Spoon Lure Set, B093L95KQ1
+Jig Heads for Bass Walleye Trout, B0F5PTZDK3
+Berkley Gulp! Floating Salmon Eggs Fluorescent Red, 0.56-Ounce, B000GAYF3M
+Hard Metal Multicolor Buzzbait Spinnerbait Jigs for Bass Pike Trout Salmon, B07DC4GB43
+Worm-Tube Jigs Kit with Smallmouth Large Mouth Bass Lake Trout, B0D8PRTY9S
+Catfish Punch Bait, B0FBYF917T
+Popping Corks for Redfish and Speckled Trout, B09ZNQ8JTM
+Chartreuse Tarpon Saltwater Streamer Fly, B07SW7ZN9G
+Bonefish Fly Fishing Flies, B07RRDYN6H
+Berkley Gulp! Alive! Shrimp/Peeler Crab Assorted, B001E25LLQ
+Bass Fishing Topwater Popper Lures, B0CGR81YDZ
+Yellowtail Snapper Jigs Fishing, B0CNPFJS1Z
+Sinkers Circle Hooks for Catfish Flounder Drum Redfish Grouper Halibut Snapper, B0F1CMB7DD
+
+Secondary Items
+
+Product, ASIN
+KastKing Spartacus II Twin-Tip Fishing Rod and Reel Combo, B0DNDMMQWG
+KastKing Brutus Twin-Tip Fishing Rod and Reel Combo, Baitcaster, Spinning & Spincast Combos, B0GC635T1V
+Wild Water Standard Fly Fishing Combo Starter Kit, B001IAHX6A
+Ugly Stik Elite Ice Spinning Reel and Fishing Rod Combo, B08X21YP1L
+Portable Fish Finder Transducer Wireless Sonar, B0FYWTWVT7
+Baitium Fishing Backpack, Tackle Bag With Rod Holders, 40L Capacity With Cooler, B0CNKRJ3QB
+Bootfoot Chest Wader, 2-Ply Nylon/PVC Waterproof Fishing Hunting, B07J4N9TM5
+
+1. GitHub — push the project if you haven't already
+  git init
+  git add .
+  git commit -m "initial commit"
+  # create repo on github.com, then:
+  git remote add origin https://github.com/yourname/water-temp-fishing-guide.git
+  git push -u origin main
+
+  2. Google Places API key — before Railway
+  console.cloud.google.com
+  → New Project → Enable "Places API"
+  → Credentials → Create API Key
+  → Restrict key to "Places API" only (important)
+
+  3. Railway
+  railway.app → New Project → Deploy from GitHub repo
+  Settings → Variables:
+    ASSOCIATES_TRACKING_ID = watertemperat-20
+    GOOGLE_PLACES_API_KEY  = your_key_here
+    DAILY_PLACES_LIMIT     = 50
+  Settings → Build Command:  python db/init_db.py
+  Settings → Start Command:  uvicorn api.main:app --host 0.0.0.0 --port $PORT
+  → Deploy → grab the public URL
+  → Test: GET https://your-app.up.railway.app/health
+
+  4. Lambda
+  Zip and upload alexa_bridge/ per the earlier guide
+  Environment variable:
+    FASTAPI_URL = https://your-app.up.railway.app
+
+  5. Connect Alexa ↔ Lambda
+  Alexa Console → Build → Endpoint → paste Lambda ARN
+  Copy Skill ID → Lambda → Triggers → Add Alexa Skills Kit → paste Skill ID
+
+  6. Test in Alexa Console
+  Test tab → "open fishing guide"
+  "what's the water temp at Revere Beach"

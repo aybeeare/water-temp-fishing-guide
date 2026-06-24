@@ -1,0 +1,33 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "name": "Fishing Water Temperature Guide",
+          "summary": "Real-time water temperatures and fish activity guide for any lake, river, bay, or ocean.",
+          "description": "Get live water temperatures powered by seatemperature.info and instantly know which fish species are active, which are at peak feeding, and get targeted fishing tips. Covers freshwater and saltwater species across the US and beyond.",
+          "examplePhrases": [
+            "Alexa, open fishing water guide",
+            "Alexa, ask fishing water guide about Lake Michigan",
+            "Alexa, ask fishing water guide what fish are biting at the Chesapeake Bay"
+          ],
+          "keywords": ["fishing", "water temperature", "fish activity", "angling", "fish guide"],
+          "smallIconUri": "",
+          "largeIconUri": ""
+        }
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "Open the skill and say 'what is the water temperature at Lake Michigan'.",
+      "category": "SPORTS",
+      "distributionCountries": ["US"]
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "arn:aws:lambda:us-east-1:REPLACE_WITH_ACCOUNT_ID:function:water-temp-fishing-guide"
+        }
+      }
+    },
+    "manifestVersion": "1.0"
+  }
+}

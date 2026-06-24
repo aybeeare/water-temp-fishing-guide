@@ -1,0 +1,113 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "guia de pesca",
+      "intents": [
+        {
+          "name": "GetFishingGuideIntent",
+          "slots": [
+            { "name": "WaterBody", "type": "WATER_BODY" }
+          ],
+          "samples": [
+            "qual é a temperatura da água no {WaterBody}",
+            "temperatura da água no {WaterBody}",
+            "qual é a temperatura no {WaterBody}",
+            "guia de pesca para o {WaterBody}",
+            "quais peixes estão ativos no {WaterBody}",
+            "quais peixes posso pescar no {WaterBody}",
+            "o que está mordendo no {WaterBody}",
+            "condições de pesca no {WaterBody}",
+            "relatório de pesca para o {WaterBody}",
+            "{WaterBody} temperatura da água",
+            "como está a água no {WaterBody}"
+          ]
+        },
+        {
+          "name": "GetFishSpeciesIntent",
+          "slots": [
+            { "name": "WaterBody", "type": "WATER_BODY" }
+          ],
+          "samples": [
+            "que peixes vivem no {WaterBody}",
+            "que peixes há no {WaterBody}",
+            "quais espécies vivem no {WaterBody}",
+            "que tipos de peixes há no {WaterBody}",
+            "listar peixes do {WaterBody}",
+            "espécies de peixes no {WaterBody}",
+            "{WaterBody} espécies de peixes",
+            "quais peixes podem ser encontrados no {WaterBody}"
+          ]
+        },
+        {
+          "name": "ChoiceIntent",
+          "slots": [
+            { "name": "Choice", "type": "AMAZON.NUMBER" }
+          ],
+          "samples": [
+            "{Choice}",
+            "o número {Choice}",
+            "opção {Choice}",
+            "o {Choice}",
+            "quero o {Choice}",
+            "escolho o {Choice}",
+            "seleciono o {Choice}"
+          ]
+        },
+        { "name": "AMAZON.HelpIntent",         "samples": [] },
+        { "name": "AMAZON.CancelIntent",        "samples": [] },
+        { "name": "AMAZON.StopIntent",          "samples": [] },
+        { "name": "AMAZON.FallbackIntent",      "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent",  "samples": [] }
+      ],
+      "types": [
+        {
+          "name": "WATER_BODY",
+          "values": [
+            { "name": { "value": "Lago Michigan",         "synonyms": ["Lake Michigan"] } },
+            { "name": { "value": "Lago Superior",         "synonyms": ["Lake Superior"] } },
+            { "name": { "value": "Lago Erie",             "synonyms": ["Lake Erie"] } },
+            { "name": { "value": "Lago Ontario",          "synonyms": ["Lake Ontario"] } },
+            { "name": { "value": "Lago Huron",            "synonyms": ["Lake Huron"] } },
+            { "name": { "value": "Lago Tahoe",            "synonyms": ["Lake Tahoe"] } },
+            { "name": { "value": "Lago Mead",             "synonyms": ["Lake Mead"] } },
+            { "name": { "value": "Rio Mississippi",       "synonyms": ["Mississippi River"] } },
+            { "name": { "value": "Rio Colorado",         "synonyms": ["Colorado River"] } },
+            { "name": { "value": "Golfo do México",      "synonyms": ["Gulf of Mexico"] } },
+            { "name": { "value": "Oceano Pacífico",      "synonyms": ["Pacific Ocean"] } },
+            { "name": { "value": "Oceano Atlântico",     "synonyms": ["Atlantic Ocean"] } },
+            { "name": { "value": "Mar do Caribe",        "synonyms": ["Caribbean Sea"] } },
+            { "name": { "value": "Baía de Chesapeake",   "synonyms": ["Chesapeake Bay"] } },
+            { "name": { "value": "Baía de Hudson",       "synonyms": ["Hudson Bay"] } },
+            { "name": { "value": "Baía de Fundy",        "synonyms": ["Bay of Fundy"] } },
+            { "name": { "value": "Mar do Norte",         "synonyms": ["North Sea"] } },
+            { "name": { "value": "Mar Báltico",          "synonyms": ["Baltic Sea"] } },
+            { "name": { "value": "Canal da Mancha",      "synonyms": ["English Channel"] } },
+            { "name": { "value": "Mar Mediterrâneo",     "synonyms": ["Mediterranean Sea"] } },
+            { "name": { "value": "Mar Adriático",        "synonyms": ["Adriatic Sea"] } },
+            { "name": { "value": "Mar Negro",            "synonyms": ["Black Sea"] } },
+            { "name": { "value": "Rio Reno",             "synonyms": ["Rhine River"] } },
+            { "name": { "value": "Rio Danúbio",          "synonyms": ["Danube River"] } },
+            { "name": { "value": "Rio Tâmisa",           "synonyms": ["Thames River"] } },
+            { "name": { "value": "Rio Volga",            "synonyms": ["Volga River"] } },
+            { "name": { "value": "Lago Ladoga",          "synonyms": ["Lake Ladoga"] } },
+            { "name": { "value": "Lago Genebra",         "synonyms": ["Lake Geneva", "Lac Léman"] } },
+            { "name": { "value": "Lago Constança",       "synonyms": ["Lake Constance", "Bodensee"] } },
+            { "name": { "value": "Lago Como",            "synonyms": ["Lake Como"] } },
+            { "name": { "value": "Lago Garda",           "synonyms": ["Lake Garda"] } },
+            { "name": { "value": "Rio Amazonas",         "synonyms": ["Amazon River", "o Amazonas"] } },
+            { "name": { "value": "Rio Negro" } },
+            { "name": { "value": "Rio Xingu",            "synonyms": ["Xingu River", "o Xingu"] } },
+            { "name": { "value": "Rio Tapajós",          "synonyms": ["Tapajos River", "o Tapajós"] } },
+            { "name": { "value": "Rio Madeira",          "synonyms": ["Madeira River", "o Madeira"] } },
+            { "name": { "value": "Rio Araguaia",         "synonyms": ["Araguaia River"] } },
+            { "name": { "value": "Rio Paraná",           "synonyms": ["Parana River", "o Paraná"] } },
+            { "name": { "value": "Rio São Francisco",    "synonyms": ["Sao Francisco River", "o São Francisco"] } },
+            { "name": { "value": "Pantanal" } },
+            { "name": { "value": "Baía de Guanabara",   "synonyms": ["Guanabara Bay"] } },
+            { "name": { "value": "Baía de Todos os Santos", "synonyms": ["Todos os Santos Bay"] } }
+          ]
+        }
+      ]
+    }
+  }
+}

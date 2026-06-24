@@ -1,0 +1,94 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "guía de pesca",
+      "intents": [
+        {
+          "name": "GetFishingGuideIntent",
+          "slots": [
+            { "name": "WaterBody", "type": "WATER_BODY" }
+          ],
+          "samples": [
+            "cuál es la temperatura del agua en {WaterBody}",
+            "temperatura del agua en {WaterBody}",
+            "temperatura en {WaterBody}",
+            "qué temperatura tiene {WaterBody}",
+            "guía de pesca para {WaterBody}",
+            "qué peces están activos en {WaterBody}",
+            "qué peces puedo pescar en {WaterBody}",
+            "qué pican en {WaterBody}",
+            "condiciones de pesca en {WaterBody}",
+            "informe de pesca para {WaterBody}",
+            "{WaterBody} temperatura del agua",
+            "cómo está el agua en {WaterBody}"
+          ]
+        },
+        {
+          "name": "GetFishSpeciesIntent",
+          "slots": [
+            { "name": "WaterBody", "type": "WATER_BODY" }
+          ],
+          "samples": [
+            "qué peces hay en {WaterBody}",
+            "qué peces viven en {WaterBody}",
+            "qué especies hay en {WaterBody}",
+            "qué tipos de peces hay en {WaterBody}",
+            "listar peces de {WaterBody}",
+            "especies de peces en {WaterBody}",
+            "{WaterBody} especies de peces"
+          ]
+        },
+        {
+          "name": "ChoiceIntent",
+          "slots": [
+            { "name": "Choice", "type": "AMAZON.NUMBER" }
+          ],
+          "samples": [
+            "{Choice}",
+            "el número {Choice}",
+            "opción {Choice}",
+            "el {Choice}",
+            "quiero el {Choice}",
+            "elijo el {Choice}"
+          ]
+        },
+        { "name": "AMAZON.HelpIntent",         "samples": [] },
+        { "name": "AMAZON.CancelIntent",        "samples": [] },
+        { "name": "AMAZON.StopIntent",          "samples": [] },
+        { "name": "AMAZON.FallbackIntent",      "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent",  "samples": [] }
+      ],
+      "types": [
+        {
+          "name": "WATER_BODY",
+          "values": [
+            { "name": { "value": "Lago Michigan",       "synonyms": ["Lake Michigan"] } },
+            { "name": { "value": "Lago Superior",       "synonyms": ["Lake Superior"] } },
+            { "name": { "value": "Lago Erie",           "synonyms": ["Lake Erie"] } },
+            { "name": { "value": "Lago Ontario",        "synonyms": ["Lake Ontario"] } },
+            { "name": { "value": "Lago Tahoe",          "synonyms": ["Lake Tahoe"] } },
+            { "name": { "value": "Lago Mead",           "synonyms": ["Lake Mead"] } },
+            { "name": { "value": "Río Mississippi",     "synonyms": ["Mississippi River", "el Mississippi"] } },
+            { "name": { "value": "Río Colorado",       "synonyms": ["Colorado River", "el Colorado"] } },
+            { "name": { "value": "Río Missouri",       "synonyms": ["Missouri River"] } },
+            { "name": { "value": "Golfo de México",    "synonyms": ["Gulf of Mexico"] } },
+            { "name": { "value": "Océano Pacífico",    "synonyms": ["Pacific Ocean"] } },
+            { "name": { "value": "Océano Atlántico",   "synonyms": ["Atlantic Ocean"] } },
+            { "name": { "value": "Mar Caribe",         "synonyms": ["Caribbean Sea", "el Caribe"] } },
+            { "name": { "value": "Bahía de Chesapeake","synonyms": ["Chesapeake Bay"] } },
+            { "name": { "value": "Bahía de San Francisco", "synonyms": ["San Francisco Bay"] } },
+            { "name": { "value": "Bahía de Hudson",    "synonyms": ["Hudson Bay"] } },
+            { "name": { "value": "Mar Mediterráneo",   "synonyms": ["Mediterranean Sea"] } },
+            { "name": { "value": "Río Amazonas",       "synonyms": ["Amazon River", "el Amazonas"] } },
+            { "name": { "value": "Río Negro" } },
+            { "name": { "value": "Río Tapajós",        "synonyms": ["Tapajos River"] } },
+            { "name": { "value": "Río Paraná",         "synonyms": ["Parana River"] } },
+            { "name": { "value": "Río San Francisco",  "synonyms": ["Sao Francisco River"] } },
+            { "name": { "value": "Pantanal" } },
+            { "name": { "value": "Bahía de Guanabara", "synonyms": ["Guanabara Bay"] } }
+          ]
+        }
+      ]
+    }
+  }
+}

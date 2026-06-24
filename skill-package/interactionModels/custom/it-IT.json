@@ -1,0 +1,114 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "guida alla pesca",
+      "intents": [
+        {
+          "name": "GetFishingGuideIntent",
+          "slots": [
+            { "name": "WaterBody", "type": "WATER_BODY" }
+          ],
+          "samples": [
+            "qual è la temperatura dell'acqua a {WaterBody}",
+            "temperatura dell'acqua a {WaterBody}",
+            "quanto è caldo {WaterBody}",
+            "quanto è freddo {WaterBody}",
+            "guida alla pesca per {WaterBody}",
+            "quali pesci sono attivi a {WaterBody}",
+            "quali pesci posso pescare a {WaterBody}",
+            "cosa abbocca a {WaterBody}",
+            "condizioni di pesca a {WaterBody}",
+            "rapporto di pesca per {WaterBody}",
+            "{WaterBody} temperatura dell'acqua"
+          ]
+        },
+        {
+          "name": "GetFishSpeciesIntent",
+          "slots": [
+            { "name": "WaterBody", "type": "WATER_BODY" }
+          ],
+          "samples": [
+            "quali pesci vivono in {WaterBody}",
+            "quali pesci ci sono in {WaterBody}",
+            "quali specie vivono in {WaterBody}",
+            "che tipi di pesci ci sono in {WaterBody}",
+            "specie ittiche in {WaterBody}",
+            "{WaterBody} specie ittiche",
+            "elenca i pesci di {WaterBody}"
+          ]
+        },
+        {
+          "name": "ChoiceIntent",
+          "slots": [
+            { "name": "Choice", "type": "AMAZON.NUMBER" }
+          ],
+          "samples": [
+            "{Choice}",
+            "il numero {Choice}",
+            "l'opzione {Choice}",
+            "il {Choice}",
+            "voglio il {Choice}",
+            "scelgo il {Choice}"
+          ]
+        },
+        { "name": "AMAZON.HelpIntent",         "samples": [] },
+        { "name": "AMAZON.CancelIntent",        "samples": [] },
+        { "name": "AMAZON.StopIntent",          "samples": [] },
+        { "name": "AMAZON.FallbackIntent",      "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent",  "samples": [] }
+      ],
+      "types": [
+        {
+          "name": "WATER_BODY",
+          "values": [
+            { "name": { "value": "Lago Michigan",         "synonyms": ["Lake Michigan"] } },
+            { "name": { "value": "Lago Superiore",        "synonyms": ["Lake Superior"] } },
+            { "name": { "value": "Lago Erie",             "synonyms": ["Lake Erie"] } },
+            { "name": { "value": "Lago Ontario",          "synonyms": ["Lake Ontario"] } },
+            { "name": { "value": "Lago Huron",            "synonyms": ["Lake Huron"] } },
+            { "name": { "value": "Lago Tahoe",            "synonyms": ["Lake Tahoe"] } },
+            { "name": { "value": "Lago Mead",             "synonyms": ["Lake Mead"] } },
+            { "name": { "value": "fiume Mississippi",     "synonyms": ["Mississippi River", "il Mississippi"] } },
+            { "name": { "value": "fiume Colorado",        "synonyms": ["Colorado River"] } },
+            { "name": { "value": "fiume Missouri",        "synonyms": ["Missouri River"] } },
+            { "name": { "value": "baia di Chesapeake",    "synonyms": ["Chesapeake Bay"] } },
+            { "name": { "value": "Golfo del Messico",     "synonyms": ["Gulf of Mexico"] } },
+            { "name": { "value": "Oceano Pacifico",       "synonyms": ["Pacific Ocean", "il Pacifico"] } },
+            { "name": { "value": "Oceano Atlantico",      "synonyms": ["Atlantic Ocean", "l'Atlantico"] } },
+            { "name": { "value": "Mar dei Caraibi",       "synonyms": ["Caribbean Sea", "i Caraibi"] } },
+            { "name": { "value": "Baia di Hudson",        "synonyms": ["Hudson Bay"] } },
+            { "name": { "value": "Baia di Fundy",         "synonyms": ["Bay of Fundy"] } },
+            { "name": { "value": "Mare del Nord",         "synonyms": ["North Sea"] } },
+            { "name": { "value": "Mar Baltico",           "synonyms": ["Baltic Sea"] } },
+            { "name": { "value": "Mare di Norvegia",      "synonyms": ["Norwegian Sea"] } },
+            { "name": { "value": "Canale della Manica",   "synonyms": ["English Channel"] } },
+            { "name": { "value": "Mare d'Irlanda",        "synonyms": ["Irish Sea"] } },
+            { "name": { "value": "Golfo di Biscaglia",    "synonyms": ["Bay of Biscay"] } },
+            { "name": { "value": "Mare Adriatico",        "synonyms": ["Adriatic Sea"] } },
+            { "name": { "value": "Mar Mediterraneo",      "synonyms": ["Mediterranean Sea", "il Mediterraneo"] } },
+            { "name": { "value": "Mar Nero",              "synonyms": ["Black Sea"] } },
+            { "name": { "value": "Reno",                  "synonyms": ["Rhine River", "il Reno"] } },
+            { "name": { "value": "Danubio",               "synonyms": ["Danube River", "il Danubio"] } },
+            { "name": { "value": "Tamigi",                "synonyms": ["Thames River", "il Tamigi"] } },
+            { "name": { "value": "Shannon",               "synonyms": ["Shannon River"] } },
+            { "name": { "value": "Loira",                 "synonyms": ["Loire River", "la Loira"] } },
+            { "name": { "value": "Volga",                 "synonyms": ["Volga River", "la Volga"] } },
+            { "name": { "value": "Lago Ladoga",           "synonyms": ["Lake Ladoga"] } },
+            { "name": { "value": "Lago di Ginevra",       "synonyms": ["Lake Geneva", "Lac Léman"] } },
+            { "name": { "value": "Lago di Costanza",      "synonyms": ["Lake Constance", "Bodensee"] } },
+            { "name": { "value": "Lago di Como",          "synonyms": ["Lake Como"] } },
+            { "name": { "value": "Lago di Garda",         "synonyms": ["Lake Garda"] } },
+            { "name": { "value": "Loch Ness" } },
+            { "name": { "value": "Loch Lomond" } },
+            { "name": { "value": "Rio delle Amazzoni",    "synonyms": ["Amazon River", "Amazzoni"] } },
+            { "name": { "value": "Rio Negro" } },
+            { "name": { "value": "Rio Tapajós",           "synonyms": ["Tapajos River"] } },
+            { "name": { "value": "Rio Paraná",            "synonyms": ["Parana River"] } },
+            { "name": { "value": "Pantanal" } },
+            { "name": { "value": "Baia di Guanabara",     "synonyms": ["Guanabara Bay"] } }
+          ]
+        }
+      ]
+    }
+  }
+}
