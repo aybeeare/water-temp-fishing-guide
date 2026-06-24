@@ -215,8 +215,6 @@ def build_spoken_response(site_name: str, temp_f: float, temp_c: float,
             parts.append(
                 f"Common species here include {', '.join(readable[:-1])} and {readable[-1]}."
             )
-    if logic:
-        parts.append(logic["fish_behavior"])
     tide_speech = format_tide_speech(tides)
     if tide_speech:
         parts.append(tide_speech)
