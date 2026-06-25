@@ -231,7 +231,7 @@ def fetch_and_open(location):
     if temp_f_min and temp_f_max:
         temp_speech = (
             f"Water temperatures at {site_name} today range from "
-            f"{temp_f_min} to {temp_f_max} degrees Fahrenheit across the lake."
+            f"{temp_f_min} to {temp_f_max} degrees Fahrenheit."
         )
     else:
         temp_speech = (
