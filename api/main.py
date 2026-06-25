@@ -316,9 +316,12 @@ async def fishing_guide(
         water = await resolve_scrape(resolved_id)
 
     if water is None:
-        # Primary source offline or no data — try seatemperature.info as fallback
+        # Primary source offline or no data — try seatemperature.info as fallback.
+        # Skip if we already tried the scraper (source == "scrape") with the same slug
+        # to avoid a redundant double-request on unknown locations.
         scrape_slug = normalize_location(location) if location else normalize_location(resolved_id)
-        water = await resolve_scrape(scrape_slug)
+        if source != "scrape" or scrape_slug != resolved_id:
+            water = await resolve_scrape(scrape_slug)
         if water is None:
             raise HTTPException(
                 status_code=404,

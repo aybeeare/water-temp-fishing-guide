@@ -114,22 +114,26 @@ def extract_temperature(html: str) -> Optional[dict]:
                 return result
 
     # Strategy 2 — warmest/coldest range (large water bodies like Great Lakes).
-    # Guard: skip if a month name appears in either match span — that indicates
-    # historical "warmest month is August" seasonal stats, not current readings.
-    # Also require both matches are within 500 chars of each other (same paragraph).
-    _MONTHS_RE = re.compile(
+    # Only fires when both matches are close together AND the surrounding context
+    # contains a current-time indicator ("today", "current", etc.).
+    # This filters out historical record text like "the warmest ever recorded was X".
+    _MONTHS_RE  = re.compile(
         r'\b(january|february|march|april|may|june|july|august|'
         r'september|october|november|december)\b', re.IGNORECASE
     )
+    _CURRENT_RE = re.compile(r'\b(today|current|right now|as of|at this time)\b', re.IGNORECASE)
     body_text = soup.get_text(" ", strip=True)
     w = re.search(r'warmest.*?(\d{2,3}(?:\.\d)?)\s*°?\s*F', body_text, re.IGNORECASE)
     c = re.search(r'coldest.*?(\d{2,3}(?:\.\d)?)\s*°?\s*F', body_text, re.IGNORECASE)
     if w and c:
-        w_span = body_text[w.start():w.end()]
-        c_span = body_text[c.start():c.end()]
         proximity_ok = abs(w.start() - c.start()) < 500
-        no_month = not _MONTHS_RE.search(w_span) and not _MONTHS_RE.search(c_span)
-        if proximity_ok and no_month:
+        # Check for month names and current-time words in the extended context window
+        ctx_start  = max(0, min(w.start(), c.start()) - 100)
+        ctx_end    = max(w.end(), c.end())
+        ctx        = body_text[ctx_start:ctx_end]
+        no_month   = not _MONTHS_RE.search(ctx)
+        has_current = bool(_CURRENT_RE.search(ctx))
+        if proximity_ok and no_month and has_current:
             temp_f_max = round(float(w.group(1)), 1)
             temp_f_min = round(float(c.group(1)), 1)
             avg_f      = round((temp_f_max + temp_f_min) / 2, 1)

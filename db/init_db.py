@@ -1279,6 +1279,7 @@ ALIAS_SEED = [
 
     # San Francisco (9414290) — Bay Area coast
     ("half-moon-bay",       "9414290", "noaa"),
+    ("half-moon-beach",     "9414290", "noaa"),
     ("pacifica",            "9414290", "noaa"),
     ("stinson-beach",       "9415020", "noaa"),
     ("bodega-bay",          "9415020", "noaa"),
