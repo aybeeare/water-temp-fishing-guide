@@ -27,7 +27,15 @@
             "how cold is {WaterBody}",
             "what's biting at {WaterBody}",
             "give me a fishing report for {WaterBody}",
-            "fishing report for {WaterBody}"
+            "fishing report for {WaterBody}",
+            "what about {WaterBody}",
+            "how about {WaterBody}",
+            "what about {WaterBody} instead",
+            "how about {WaterBody} instead",
+            "what about conditions at {WaterBody}",
+            "try {WaterBody}",
+            "switch to {WaterBody}",
+            "{WaterBody}"
           ]
         },
         {
