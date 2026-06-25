@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS water_cache (
     site_name     TEXT    NOT NULL,
     temp_f        REAL,               -- NULL when sensor offline
     temp_c        REAL,
+    temp_f_min    REAL,               -- coldest point (large water bodies only)
+    temp_f_max    REAL,               -- warmest point (large water bodies only)
     fetched_at    TEXT    NOT NULL,   -- ISO-8601 UTC
     raw_datetime  TEXT                -- timestamp returned by USGS
 );

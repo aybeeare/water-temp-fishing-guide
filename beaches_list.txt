@@ -1,0 +1,384 @@
+# North America Beach List
+# Format: beach_name | slug | state_province | country | nearest_noaa_station | notes
+# Stations marked (est) need verification against tidesandcurrents.noaa.gov
+
+# ── MAINE ─────────────────────────────────────────────────────────────────────
+Old Orchard Beach        | old-orchard-beach        | ME | USA | 8419317 |
+Ogunquit Beach           | ogunquit-beach           | ME | USA | 8419317 |
+Wells Beach              | wells-beach               | ME | USA | 8419317 |
+Kennebunk Beach          | kennebunk-beach           | ME | USA | 8419317 |
+Kennebunkport            | kennebunkport             | ME | USA | 8419317 |
+Popham Beach             | popham-beach              | ME | USA | 8418150 | est
+Reid State Park          | reid-state-park           | ME | USA | 8418150 | est
+Crescent Beach ME        | crescent-beach-maine      | ME | USA | 8418150 | est
+Scarborough Beach        | scarborough-beach         | ME | USA | 8418150 | est
+Pine Point Beach         | pine-point-beach          | ME | USA | 8419317 |
+Ferry Beach              | ferry-beach               | ME | USA | 8419317 |
+Gooch's Beach            | goochs-beach              | ME | USA | 8419317 |
+Pemaquid Beach           | pemaquid-beach            | ME | USA | 8418150 | est
+Acadia National Park     | acadia-national-park      | ME | USA | 8413320 | Bar Harbor
+
+# ── NEW HAMPSHIRE ────────────────────────────────────────────────────────────
+Hampton Beach            | hampton-beach             | NH | USA | 8419317 |
+Rye Beach                | rye-beach                 | NH | USA | 8419317 |
+Wallis Sands             | wallis-sands              | NH | USA | 8419317 |
+North Beach NH           | north-beach-nh            | NH | USA | 8419317 |
+Jenness Beach            | jenness-beach             | NH | USA | 8419317 |
+
+# ── MASSACHUSETTS ────────────────────────────────────────────────────────────
+Revere Beach             | revere-beach              | MA | USA | 8443970 |
+Carson Beach             | carson-beach              | MA | USA | 8443970 |
+Nahant Beach             | nahant-beach              | MA | USA | 8443970 |
+Lynn Beach               | lynn-beach                | MA | USA | 8443970 |
+Crane Beach              | crane-beach               | MA | USA | 8443970 |
+Good Harbor Beach        | good-harbor-beach         | MA | USA | 8443970 |
+Wingaersheek Beach       | wingaersheek-beach        | MA | USA | 8443970 |
+Singing Beach            | singing-beach             | MA | USA | 8443970 |
+Duxbury Beach            | duxbury-beach             | MA | USA | 8443970 |
+Plymouth Beach           | plymouth-beach            | MA | USA | 8443970 |
+Horseneck Beach          | horseneck-beach           | MA | USA | 8447270 | Buzzards Bay
+Demarest Lloyd           | demarest-lloyd            | MA | USA | 8447270 | est
+Race Point Beach         | race-point-beach          | MA | USA | 8447930 | Provincetown
+Herring Cove Beach       | herring-cove-beach        | MA | USA | 8447930 |
+Coast Guard Beach        | coast-guard-beach         | MA | USA | 8447930 |
+Nauset Beach             | nauset-beach              | MA | USA | 8447930 |
+Chatham Beach            | chatham-beach             | MA | USA | 8447930 |
+Nantucket Island         | nantucket-island          | MA | USA | 8449130 |
+Martha's Vineyard        | marthas-vineyard          | MA | USA | 8447930 | est
+Menauhant Beach          | menauhant-beach           | MA | USA | 8447270 |
+
+# ── RHODE ISLAND ────────────────────────────────────────────────────────────
+Misquamicut Beach        | misquamicut-beach         | RI | USA | 8461490 |
+Watch Hill Beach         | watch-hill-beach          | RI | USA | 8461490 |
+Narragansett Beach       | narragansett-beach        | RI | USA | 8452660 |
+East Beach RI            | east-beach-ri             | RI | USA | 8452660 | est
+Second Beach RI          | second-beach-ri           | RI | USA | 8452660 |
+Third Beach RI           | third-beach-ri            | RI | USA | 8452660 |
+Easton's Beach           | eastons-beach             | RI | USA | 8452660 |
+Scarborough Beach RI     | scarborough-beach-ri      | RI | USA | 8452660 |
+
+# ── CONNECTICUT ─────────────────────────────────────────────────────────────
+Hammonasset Beach        | hammonasset-beach         | CT | USA | 8461490 |
+Rocky Neck Beach         | rocky-neck-beach          | CT | USA | 8461490 |
+Ocean Beach CT           | ocean-beach-ct            | CT | USA | 8461490 |
+Misquamicut CT           | misquamicut               | CT | USA | 8461490 |
+
+# ── NEW YORK ─────────────────────────────────────────────────────────────────
+Jones Beach              | jones-beach               | NY | USA | 8516945 |
+Long Beach NY            | long-beach-ny             | NY | USA | 8516945 |
+Robert Moses Beach       | robert-moses-beach        | NY | USA | 8516945 |
+Fire Island              | fire-island               | NY | USA | 8516945 |
+Montauk Beach            | montauk-beach             | NY | USA | 8510560 |
+Coopers Beach            | coopers-beach             | NY | USA | 8510560 |
+Main Beach Southampton   | main-beach-southampton    | NY | USA | 8510560 |
+Rockaway Beach           | rockaway-beach            | NY | USA | 8516945 |
+Coney Island Beach       | coney-island-beach        | NY | USA | 8516945 |
+Orient Beach             | orient-beach              | NY | USA | 8510560 |
+Sunken Meadow Beach      | sunken-meadow-beach       | NY | USA | 8516945 | est
+Lake George              | lake-george               | NY | USA | scrape  |
+
+# ── NEW JERSEY ──────────────────────────────────────────────────────────────
+Sandy Hook               | sandy-hook                | NJ | USA | 8516945 |
+Asbury Park Beach        | asbury-park-beach         | NJ | USA | 8531680 |
+Belmar Beach             | belmar-beach              | NJ | USA | 8531680 |
+Manasquan Beach          | manasquan-beach           | NJ | USA | 8531680 |
+Point Pleasant Beach     | point-pleasant-beach      | NJ | USA | 8531680 |
+Seaside Heights Beach    | seaside-heights-beach     | NJ | USA | 8534720 |
+Long Beach Island NJ     | long-beach-island-nj      | NJ | USA | 8534720 |
+Atlantic City Beach      | atlantic-city-beach       | NJ | USA | 8534720 |
+Ocean City NJ Beach      | ocean-city-beach-nj       | NJ | USA | 8534720 |
+Wildwood Beach           | wildwood-beach            | NJ | USA | 8536110 |
+Cape May Beach           | cape-may-beach            | NJ | USA | 8536110 |
+Avalon Beach NJ          | avalon-beach-nj           | NJ | USA | 8536110 |
+Stone Harbor Beach       | stone-harbor-beach        | NJ | USA | 8536110 |
+
+# ── DELAWARE ────────────────────────────────────────────────────────────────
+Rehoboth Beach           | rehoboth-beach            | DE | USA | 8557380 |
+Dewey Beach              | dewey-beach               | DE | USA | 8557380 |
+Bethany Beach            | bethany-beach             | DE | USA | 8557380 |
+Fenwick Island           | fenwick-island            | DE | USA | 8557380 |
+
+# ── MARYLAND ────────────────────────────────────────────────────────────────
+Ocean City MD            | ocean-city-md             | MD | USA | 8570283 |
+Assateague Island        | assateague-island         | MD | USA | 8570283 |
+
+# ── VIRGINIA ────────────────────────────────────────────────────────────────
+Virginia Beach           | virginia-beach            | VA | USA | 8638610 |
+Sandbridge Beach         | sandbridge-beach          | VA | USA | 8638610 |
+First Landing Beach      | first-landing-beach       | VA | USA | 8638610 |
+Chincoteague Beach       | chincoteague-beach        | VA | USA | 8638610 | est
+
+# ── NORTH CAROLINA ──────────────────────────────────────────────────────────
+Kill Devil Hills Beach   | kill-devil-hills-beach    | NC | USA | 8651370 |
+Nags Head Beach          | nags-head-beach           | NC | USA | 8651370 |
+Kitty Hawk Beach         | kitty-hawk-beach          | NC | USA | 8651370 |
+Duck NC Beach            | duck-nc-beach             | NC | USA | 8651370 |
+Corolla Beach            | corolla-beach             | NC | USA | 8651370 |
+Cape Hatteras            | cape-hatteras             | NC | USA | 8654467 |
+Emerald Isle NC          | emerald-isle-nc           | NC | USA | 8656483 |
+Atlantic Beach NC        | atlantic-beach-nc         | NC | USA | 8656483 |
+Wrightsville Beach       | wrightsville-beach        | NC | USA | 8658120 |
+Carolina Beach           | carolina-beach            | NC | USA | 8658120 |
+Kure Beach               | kure-beach                | NC | USA | 8658120 |
+Topsail Beach            | topsail-beach             | NC | USA | 8658120 | est
+
+# ── SOUTH CAROLINA ──────────────────────────────────────────────────────────
+Myrtle Beach             | myrtle-beach              | SC | USA | 8661070 |
+Pawleys Island           | pawleys-island            | SC | USA | 8661070 |
+Folly Beach              | folly-beach               | SC | USA | 8665530 |
+Sullivan's Island        | sullivans-island          | SC | USA | 8665530 |
+Isle of Palms            | isle-of-palms             | SC | USA | 8665530 |
+Kiawah Island            | kiawah-island             | SC | USA | 8665530 |
+Hilton Head Island       | hilton-head-island        | SC | USA | 8665530 |
+Edisto Beach             | edisto-beach              | SC | USA | 8665530 | est
+
+# ── GEORGIA ─────────────────────────────────────────────────────────────────
+Tybee Island             | tybee-island              | GA | USA | 8670870 |
+Jekyll Island            | jekyll-island             | GA | USA | 8670870 |
+St. Simons Island        | st-simons-island          | GA | USA | 8670870 |
+Sea Island GA            | sea-island-ga             | GA | USA | 8670870 |
+Cumberland Island        | cumberland-island         | GA | USA | 8670870 |
+Sapelo Island            | sapelo-island             | GA | USA | 8670870 | est
+
+# ── FLORIDA ATLANTIC ────────────────────────────────────────────────────────
+Fernandina Beach         | fernandina-beach          | FL | USA | 8720218 |
+Jacksonville Beach       | jacksonville-beach        | FL | USA | 8720030 |
+Ponte Vedra Beach        | ponte-vedra-beach         | FL | USA | 8720030 |
+St. Augustine Beach      | st-augustine-beach        | FL | USA | 8720587 |
+Flagler Beach            | flagler-beach             | FL | USA | 8720587 | est
+Daytona Beach            | daytona-beach             | FL | USA | 8721604 |
+New Smyrna Beach         | new-smyrna-beach          | FL | USA | 8721604 |
+Cocoa Beach              | cocoa-beach               | FL | USA | 8721604 |
+Melbourne Beach          | melbourne-beach           | FL | USA | 8721604 |
+Vero Beach               | vero-beach                | FL | USA | 8722208 |
+Fort Pierce Beach        | fort-pierce-beach         | FL | USA | 8722208 |
+Jensen Beach             | jensen-beach              | FL | USA | 8722208 |
+Juno Beach               | juno-beach                | FL | USA | 8722670 |
+Palm Beach               | palm-beach                | FL | USA | 8722670 |
+Delray Beach             | delray-beach              | FL | USA | 8722670 |
+Boca Raton Beach         | boca-raton-beach          | FL | USA | 8722670 |
+Pompano Beach            | pompano-beach             | FL | USA | 8723214 |
+Fort Lauderdale Beach    | fort-lauderdale-beach     | FL | USA | 8723214 |
+Hollywood Beach          | hollywood-beach           | FL | USA | 8723214 |
+Miami Beach              | miami-beach               | FL | USA | 8723214 |
+Key Biscayne             | key-biscayne              | FL | USA | 8723214 |
+Bal Harbour Beach        | bal-harbour-beach         | FL | USA | 8723214 |
+
+# ── FLORIDA KEYS ────────────────────────────────────────────────────────────
+Key Largo                | key-largo                 | FL | USA | 8724580 |
+Islamorada               | islamorada                | FL | USA | 8724580 |
+Marathon FL              | marathon-fl               | FL | USA | 8724580 |
+Key West                 | key-west                  | FL | USA | 8724580 |
+
+# ── FLORIDA GULF ────────────────────────────────────────────────────────────
+St. Pete Beach           | st-pete-beach             | FL | USA | 8726520 |
+Clearwater Beach         | clearwater-beach          | FL | USA | 8726520 |
+Treasure Island FL       | treasure-island-fl        | FL | USA | 8726520 |
+Madeira Beach            | madeira-beach             | FL | USA | 8726520 |
+Indian Rocks Beach       | indian-rocks-beach        | FL | USA | 8726520 |
+Honeymoon Island FL      | honeymoon-island-fl       | FL | USA | 8726520 |
+Caladesi Island          | caladesi-island           | FL | USA | 8726520 |
+Anna Maria Island        | anna-maria-island         | FL | USA | 8726520 |
+Bradenton Beach          | bradenton-beach           | FL | USA | 8726520 |
+Siesta Key               | siesta-key                | FL | USA | 8726520 |
+Venice Beach FL          | venice-beach-fl           | FL | USA | 8725520 |
+Englewood Beach          | englewood-beach           | FL | USA | 8725520 |
+Boca Grande FL           | boca-grande-fl            | FL | USA | 8725520 |
+Sanibel Island           | sanibel-island            | FL | USA | 8725520 |
+Captiva Island           | captiva-island            | FL | USA | 8725520 |
+Fort Myers Beach         | fort-myers-beach          | FL | USA | 8725520 |
+Naples Beach             | naples-beach              | FL | USA | 8725520 |
+Marco Island Beach       | marco-island-beach        | FL | USA | 8725520 |
+
+# ── FLORIDA PANHANDLE ────────────────────────────────────────────────────────
+Pensacola Beach          | pensacola-beach           | FL | USA | 8728690 |
+Navarre Beach            | navarre-beach             | FL | USA | 8728690 |
+Fort Walton Beach        | fort-walton-beach         | FL | USA | 8735180 |
+Destin Beach             | destin-beach              | FL | USA | 8735180 |
+Panama City Beach        | panama-city-beach         | FL | USA | 8735180 |
+Mexico Beach FL          | mexico-beach-fl           | FL | USA | 8735180 |
+Cape San Blas            | cape-san-blas             | FL | USA | 8735180 |
+St. George Island        | st-george-island          | FL | USA | 8735180 |
+
+# ── ALABAMA ──────────────────────────────────────────────────────────────────
+Gulf Shores              | gulf-shores               | AL | USA | 8735180 |
+Orange Beach             | orange-beach              | AL | USA | 8735180 |
+
+# ── MISSISSIPPI ─────────────────────────────────────────────────────────────
+Biloxi Beach             | biloxi-beach              | MS | USA | 8741533 |
+Gulfport Beach           | gulfport-beach            | MS | USA | 8741533 |
+Pass Christian Beach     | pass-christian-beach      | MS | USA | 8741533 |
+Ocean Springs Beach      | ocean-springs-beach       | MS | USA | 8741533 | est
+
+# ── LOUISIANA ───────────────────────────────────────────────────────────────
+Grand Isle LA            | grand-isle-la             | LA | USA | 8761724 |
+Holly Beach              | holly-beach               | LA | USA | 8761724 | est
+Grand Terre Island       | grand-terre-island        | LA | USA | 8761724 | est
+
+# ── TEXAS ────────────────────────────────────────────────────────────────────
+South Padre Island       | south-padre-island        | TX | USA | 8779748 |
+Padre Island Beach       | padre-island-beach        | TX | USA | 8779748 |
+Boca Chica Beach         | boca-chica-beach          | TX | USA | 8779748 |
+Port Aransas Beach       | port-aransas-beach        | TX | USA | 8775870 |
+Corpus Christi Beach     | corpus-christi-beach      | TX | USA | 8775870 |
+Rockport Beach TX        | rockport-beach-tx         | TX | USA | 8775870 |
+Galveston Beach          | galveston-beach           | TX | USA | 8771450 |
+Bolivar Peninsula        | bolivar-peninsula         | TX | USA | 8771450 |
+Freeport Beach           | freeport-beach            | TX | USA | 8771450 |
+Crystal Beach TX         | crystal-beach-tx          | TX | USA | 8771450 |
+
+# ── PACIFIC — WASHINGTON ─────────────────────────────────────────────────────
+Long Beach WA            | long-beach-wa             | WA | USA | 9440422 |
+Ocean Shores             | ocean-shores              | WA | USA | 9440422 |
+Pacific Beach WA         | pacific-beach-wa          | WA | USA | 9440422 | est
+Kalaloch Beach           | kalaloch-beach            | WA | USA | 9440422 | est
+Ruby Beach WA            | ruby-beach-wa             | WA | USA | 9440422 | est
+Westport Beach           | westport-beach            | WA | USA | 9440910 |
+
+# ── PACIFIC — OREGON ─────────────────────────────────────────────────────────
+Cannon Beach             | cannon-beach              | OR | USA | 9439040 |
+Seaside Beach OR         | seaside-beach-or          | OR | USA | 9439040 |
+Manzanita Beach          | manzanita-beach           | OR | USA | 9439040 |
+Pacific City Beach       | pacific-city-beach        | OR | USA | 9435380 |
+Lincoln City Beach       | lincoln-city-beach        | OR | USA | 9435380 |
+Newport Beach OR         | newport-beach-or          | OR | USA | 9435380 |
+Yachats Beach            | yachats-beach             | OR | USA | 9435380 | est
+Florence Beach           | florence-beach            | OR | USA | 9435380 | est
+Coos Bay Beach           | coos-bay-beach            | OR | USA | 9431647 |
+Bandon Beach             | bandon-beach              | OR | USA | 9431647 |
+Gold Beach OR            | gold-beach-or             | OR | USA | 9431647 | est
+
+# ── PACIFIC — NORTHERN CALIFORNIA ────────────────────────────────────────────
+Crescent City Beach      | crescent-city-beach       | CA | USA | 9419750 |
+Eureka Beach             | eureka-beach              | CA | USA | 9418767 |
+Fort Bragg Beach         | fort-bragg-beach          | CA | USA | 9415020 | est
+Bodega Bay Beach         | bodega-bay-beach          | CA | USA | 9415020 |
+Stinson Beach            | stinson-beach             | CA | USA | 9414290 |
+Ocean Beach SF           | ocean-beach-sf            | CA | USA | 9414290 |
+Baker Beach              | baker-beach               | CA | USA | 9414290 |
+Santa Cruz Beach         | santa-cruz-beach          | CA | USA | 9413450 |
+Capitola Beach           | capitola-beach            | CA | USA | 9413450 |
+Aptos Beach              | aptos-beach               | CA | USA | 9413450 | est
+Carmel Beach             | carmel-beach              | CA | USA | 9413450 |
+Pebble Beach CA          | pebble-beach-ca           | CA | USA | 9413450 |
+
+# ── PACIFIC — CENTRAL CALIFORNIA ─────────────────────────────────────────────
+Morro Bay Beach          | morro-bay-beach           | CA | USA | 9412110 |
+Pismo Beach              | pismo-beach               | CA | USA | 9412110 |
+Avila Beach              | avila-beach               | CA | USA | 9412110 |
+Cayucos Beach            | cayucos-beach             | CA | USA | 9412110 |
+Cambria Beach            | cambria-beach             | CA | USA | 9412110 | est
+
+# ── PACIFIC — SOUTHERN CALIFORNIA ────────────────────────────────────────────
+Ventura Beach            | ventura-beach             | CA | USA | 9410840 |
+Oxnard Beach             | oxnard-beach              | CA | USA | 9410840 |
+Santa Barbara Beach      | santa-barbara-beach       | CA | USA | 9410840 |
+Malibu Beach             | malibu-beach              | CA | USA | 9410840 |
+Santa Monica Beach       | santa-monica-beach        | CA | USA | 9410840 |
+Venice Beach             | venice-beach              | CA | USA | 9410840 |
+Manhattan Beach          | manhattan-beach           | CA | USA | 9410840 |
+Hermosa Beach            | hermosa-beach             | CA | USA | 9410840 |
+Redondo Beach            | redondo-beach             | CA | USA | 9410840 |
+Huntington Beach         | huntington-beach          | CA | USA | 9410840 |
+Newport Beach            | newport-beach             | CA | USA | 9410230 |
+Laguna Beach             | laguna-beach              | CA | USA | 9410230 |
+Dana Point Beach         | dana-point-beach          | CA | USA | 9410230 |
+San Clemente Beach       | san-clemente-beach        | CA | USA | 9410230 |
+Oceanside Beach          | oceanside-beach           | CA | USA | 9410230 |
+Carlsbad Beach           | carlsbad-beach            | CA | USA | 9410230 |
+Encinitas Beach          | encinitas-beach           | CA | USA | 9410230 |
+Del Mar Beach            | del-mar-beach             | CA | USA | 9410230 |
+La Jolla Beach           | la-jolla-beach            | CA | USA | 9410230 |
+Pacific Beach SD         | pacific-beach-sd          | CA | USA | 9410170 |
+Mission Beach            | mission-beach             | CA | USA | 9410170 |
+Ocean Beach SD           | ocean-beach-sd            | CA | USA | 9410170 |
+Coronado Beach           | coronado-beach            | CA | USA | 9410170 |
+Imperial Beach           | imperial-beach            | CA | USA | 9410170 |
+Catalina Island          | catalina-island           | CA | USA | 9410840 |
+
+# ── HAWAII ──────────────────────────────────────────────────────────────────
+Waikiki Beach            | waikiki-beach             | HI | USA | 1612340 |
+Hanauma Bay              | hanauma-bay               | HI | USA | 1612340 |
+Sandy Beach Hawaii       | sandy-beach-hawaii        | HI | USA | 1612340 |
+Lanikai Beach            | lanikai-beach             | HI | USA | 1612340 |
+Kailua Beach             | kailua-beach              | HI | USA | 1612340 |
+Sunset Beach Hawaii      | sunset-beach-hawaii       | HI | USA | 1612340 |
+Waimea Bay               | waimea-bay                | HI | USA | 1612340 |
+Haleiwa Beach            | haleiwa-beach             | HI | USA | 1612340 |
+Ka'anapali Beach         | kaanapali-beach           | HI | USA | 1617760 |
+Napili Bay               | napili-bay                | HI | USA | 1617760 |
+Makena Beach             | makena-beach              | HI | USA | 1617760 |
+Wailea Beach             | wailea-beach              | HI | USA | 1617760 |
+Kapalua Beach            | kapalua-beach             | HI | USA | 1617760 |
+Hapuna Beach             | hapuna-beach              | HI | USA | 1617760 | est Big Island
+Mauna Kea Beach          | mauna-kea-beach           | HI | USA | 1617760 | est
+Poipu Beach              | poipu-beach               | HI | USA | 1612340 | est Kauai
+Hanalei Bay              | hanalei-bay               | HI | USA | 1612340 | est
+
+# ── ALASKA ───────────────────────────────────────────────────────────────────
+Juneau Beach             | juneau-beach              | AK | USA | 9452210 |
+Sitka Beach              | sitka-beach               | AK | USA | 9451600 |
+Ketchikan Beach          | ketchikan-beach           | AK | USA | 9450460 |
+Homer Beach              | homer-beach               | AK | USA | 9455920 |
+Seward Beach             | seward-beach              | AK | USA | 9455920 |
+Kodiak Beach             | kodiak-beach              | AK | USA | 9461380 |
+
+# ── CANADA — BRITISH COLUMBIA ────────────────────────────────────────────────
+Tofino Beach             | tofino-beach              | BC | Canada | scrape |
+Chesterman Beach         | chesterman-beach          | BC | Canada | scrape |
+Cox Bay Beach            | cox-bay-beach             | BC | Canada | scrape |
+Long Beach BC            | long-beach-bc             | BC | Canada | scrape |
+English Bay Vancouver    | english-bay-vancouver     | BC | Canada | scrape |
+Spanish Banks           | spanish-banks              | BC | Canada | scrape |
+White Rock Beach         | white-rock-beach          | BC | Canada | scrape |
+Parksville Beach         | parksville-beach          | BC | Canada | scrape |
+Qualicum Beach           | qualicum-beach            | BC | Canada | scrape |
+Rathtrevor Beach         | rathtrevor-beach          | BC | Canada | scrape |
+
+# ── CANADA — ONTARIO / GREAT LAKES ──────────────────────────────────────────
+Wasaga Beach             | wasaga-beach              | ON | Canada | scrape |
+Sauble Beach             | sauble-beach              | ON | Canada | scrape |
+Grand Bend Beach         | grand-bend-beach          | ON | Canada | scrape |
+Port Stanley Beach       | port-stanley-beach        | ON | Canada | scrape |
+Sandbanks Beach          | sandbanks-beach           | ON | Canada | scrape |
+Presqu'ile Beach         | presquile-beach           | ON | Canada | scrape |
+Cobourg Beach            | cobourg-beach             | ON | Canada | scrape |
+Port Dover Beach         | port-dover-beach          | ON | Canada | scrape |
+
+# ── CANADA — ATLANTIC ────────────────────────────────────────────────────────
+Parlee Beach NB          | parlee-beach              | NB | Canada | scrape |
+Cavendish Beach          | cavendish-beach           | PEI | Canada | scrape |
+Brackley Beach           | brackley-beach            | PEI | Canada | scrape |
+Inverness Beach          | inverness-beach           | NS | Canada | scrape |
+Martinique Beach         | martinique-beach          | NS | Canada | scrape |
+Ingonish Beach           | ingonish-beach            | NS | Canada | scrape |
+Crystal Crescent Beach   | crystal-crescent-beach    | NS | Canada | scrape |
+
+# ── MEXICO — BAJA CALIFORNIA ─────────────────────────────────────────────────
+Rosarito Beach           | rosarito-beach            | BC | Mexico | scrape |
+Ensenada Beach           | ensenada-beach            | BC | Mexico | scrape |
+Cabo San Lucas Beach     | cabo-san-lucas-beach      | BCS | Mexico | scrape |
+San Jose del Cabo        | san-jose-del-cabo         | BCS | Mexico | scrape |
+La Paz Beach             | la-paz-beach              | BCS | Mexico | scrape |
+Loreto Beach             | loreto-beach              | BCS | Mexico | scrape |
+
+# ── MEXICO — PACIFIC COAST ───────────────────────────────────────────────────
+Mazatlan Beach           | mazatlan-beach            | Sin | Mexico | scrape |
+Puerto Vallarta Beach    | puerto-vallarta-beach     | Jal | Mexico | scrape |
+Sayulita Beach           | sayulita-beach            | Nay | Mexico | scrape |
+Punta Mita               | punta-mita                | Nay | Mexico | scrape |
+Manzanillo Beach         | manzanillo-beach          | Col | Mexico | scrape |
+Zihuatanejo Beach        | zihuatanejo-beach         | Gro | Mexico | scrape |
+Ixtapa Beach             | ixtapa-beach              | Gro | Mexico | scrape |
+Acapulco Beach           | acapulco-beach            | Gro | Mexico | scrape |
+Puerto Escondido         | puerto-escondido          | Oax | Mexico | scrape |
+Huatulco Beach           | huatulco-beach            | Oax | Mexico | scrape |
+
+# ── MEXICO — CARIBBEAN ───────────────────────────────────────────────────────
+Cancun Beach             | cancun-beach              | QR | Mexico | scrape |
+Playa del Carmen         | playa-del-carmen          | QR | Mexico | scrape |
+Tulum Beach              | tulum-beach               | QR | Mexico | scrape |
+Cozumel Beach            | cozumel-beach             | QR | Mexico | scrape |
+Isla Holbox              | isla-holbox               | QR | Mexico | scrape |
+Mahahual Beach           | mahahual-beach            | QR | Mexico | scrape |
+Akumal Beach             | akumal-beach              | QR | Mexico | scrape |

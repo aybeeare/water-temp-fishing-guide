@@ -1,0 +1,533 @@
+# NOAA-derived station slugs -- input for check_beach_coverage.py
+
+Adak Island                              | adak                                          | AK   | USA                  | 9461380 | noaa-auto
+Adak Island                              | adak-island                                   | AK   | USA                  | 9461380 | noaa-auto
+Adak Island                              | adak-island-ak                                | AK   | USA                  | 9461380 | noaa-auto
+Alitak                                   | alitak                                        | AK   | USA                  | 9457804 | noaa-auto
+Alitak                                   | alitak-ak                                     | AK   | USA                  | 9457804 | noaa-auto
+Anchorage                                | anchorage                                     | AK   | USA                  | 9455920 | noaa-auto
+Anchorage                                | anchorage-ak                                  | AK   | USA                  | 9455920 | noaa-auto
+Atka                                     | atka                                          | AK   | USA                  | 9461710 | noaa-auto
+Atka                                     | atka-ak                                       | AK   | USA                  | 9461710 | noaa-auto
+Cordova                                  | cordova                                       | AK   | USA                  | 9454050 | noaa-auto
+Cordova                                  | cordova-ak                                    | AK   | USA                  | 9454050 | noaa-auto
+Elfin Cove                               | elfin                                         | AK   | USA                  | 9452634 | noaa-auto
+Elfin Cove                               | elfin-cove                                    | AK   | USA                  | 9452634 | noaa-auto
+Elfin Cove                               | elfin-cove-ak                                 | AK   | USA                  | 9452634 | noaa-auto
+Juneau                                   | juneau                                        | AK   | USA                  | 9452210 | noaa-auto
+Juneau                                   | juneau-ak                                     | AK   | USA                  | 9452210 | noaa-auto
+Ketchikan                                | ketchikan                                     | AK   | USA                  | 9450460 | noaa-auto
+Ketchikan                                | ketchikan-ak                                  | AK   | USA                  | 9450460 | noaa-auto
+King Cove                                | king                                          | AK   | USA                  | 9459881 | noaa-auto
+King Cove                                | king-cove                                     | AK   | USA                  | 9459881 | noaa-auto
+King Cove                                | king-cove-ak                                  | AK   | USA                  | 9459881 | noaa-auto
+Nikiski                                  | nikiski                                       | AK   | USA                  | 9455760 | noaa-auto
+Nikiski                                  | nikiski-ak                                    | AK   | USA                  | 9455760 | noaa-auto
+Nome, Norton Sound                       | nome-norton                                   | AK   | USA                  | 9468756 | noaa-auto
+Nome, Norton Sound                       | nome-norton-sound                             | AK   | USA                  | 9468756 | noaa-auto
+Nome, Norton Sound                       | nome-norton-sound-ak                          | AK   | USA                  | 9468756 | noaa-auto
+Port Alexander                           | port-alexander                                | AK   | USA                  | 9451054 | noaa-auto
+Port Alexander                           | port-alexander-ak                             | AK   | USA                  | 9451054 | noaa-auto
+Port Moller                              | port-moller                                   | AK   | USA                  | 9463502 | noaa-auto
+Port Moller                              | port-moller-ak                                | AK   | USA                  | 9463502 | noaa-auto
+Prudhoe Bay                              | prudhoe                                       | AK   | USA                  | 9497645 | noaa-auto
+Prudhoe Bay                              | prudhoe-bay                                   | AK   | USA                  | 9497645 | noaa-auto
+Prudhoe Bay                              | prudhoe-bay-ak                                | AK   | USA                  | 9497645 | noaa-auto
+Red Dog Dock                             | red-dog-dock                                  | AK   | USA                  | 9491094 | noaa-auto
+Red Dog Dock                             | red-dog-dock-ak                               | AK   | USA                  | 9491094 | noaa-auto
+Sand Point                               | sand                                          | AK   | USA                  | 9459450 | noaa-auto
+Sand Point                               | sand-point                                    | AK   | USA                  | 9459450 | noaa-auto
+Sand Point                               | sand-point-ak                                 | AK   | USA                  | 9459450 | noaa-auto
+Seldovia                                 | seldovia                                      | AK   | USA                  | 9455500 | noaa-auto
+Seldovia                                 | seldovia-ak                                   | AK   | USA                  | 9455500 | noaa-auto
+Sitka                                    | sitka                                         | AK   | USA                  | 9451600 | noaa-auto
+Sitka                                    | sitka-ak                                      | AK   | USA                  | 9451600 | noaa-auto
+Skagway, Taiya Inlet                     | skagway-taiya                                 | AK   | USA                  | 9452400 | noaa-auto
+Skagway, Taiya Inlet                     | skagway-taiya-inlet                           | AK   | USA                  | 9452400 | noaa-auto
+Skagway, Taiya Inlet                     | skagway-taiya-inlet-ak                        | AK   | USA                  | 9452400 | noaa-auto
+Unalakleet                               | unalakleet                                    | AK   | USA                  | 9468333 | noaa-auto
+Unalakleet                               | unalakleet-ak                                 | AK   | USA                  | 9468333 | noaa-auto
+Unalaska                                 | unalaska                                      | AK   | USA                  | 9462620 | noaa-auto
+Unalaska                                 | unalaska-ak                                   | AK   | USA                  | 9462620 | noaa-auto
+Valdez                                   | valdez                                        | AK   | USA                  | 9454240 | noaa-auto
+Valdez                                   | valdez-ak                                     | AK   | USA                  | 9454240 | noaa-auto
+Village Cove, St Paul Island             | village-cove-st-paul                          | AK   | USA                  | 9464212 | noaa-auto
+Village Cove, St Paul Island             | village-cove-st-paul-island                   | AK   | USA                  | 9464212 | noaa-auto
+Village Cove, St Paul Island             | village-cove-st-paul-island-ak                | AK   | USA                  | 9464212 | noaa-auto
+Yakutat, Yakutat Bay                     | yakutat-yakutat                               | AK   | USA                  | 9453220 | noaa-auto
+Yakutat, Yakutat Bay                     | yakutat-yakutat-bay                           | AK   | USA                  | 9453220 | noaa-auto
+Yakutat, Yakutat Bay                     | yakutat-yakutat-bay-ak                        | AK   | USA                  | 9453220 | noaa-auto
+Coast Guard Sector Mobile                | coast-guard-sector-mobile                     | AL   | USA                  | 8736897 | noaa-auto
+Coast Guard Sector Mobile                | coast-guard-sector-mobile-al                  | AL   | USA                  | 8736897 | noaa-auto
+Dauphin Island                           | dauphin                                       | AL   | USA                  | 8735180 | noaa-auto
+Dauphin Island                           | dauphin-island                                | AL   | USA                  | 8735180 | noaa-auto
+Dauphin Island                           | dauphin-island-al                             | AL   | USA                  | 8735180 | noaa-auto
+Mobile State Docks                       | mobile-state-docks                            | AL   | USA                  | 8737048 | noaa-auto
+Mobile State Docks                       | mobile-state-docks-al                         | AL   | USA                  | 8737048 | noaa-auto
+Pago Pago, American Samoa                | pago-pago-american-samoa                      | AMERICAN SAMOA | USA                  | 1770000 | noaa-auto
+Pago Pago, American Samoa                | pago-pago-american-samoa-american samoa       | AMERICAN SAMOA | USA                  | 1770000 | noaa-auto
+Bermuda Biological Station               | bermuda-biological                            | BERMUDA | USA                  | 2695535 | noaa-auto
+Bermuda Biological Station               | bermuda-biological-station                    | BERMUDA | USA                  | 2695535 | noaa-auto
+Bermuda Biological Station               | bermuda-biological-station-bermuda            | BERMUDA | USA                  | 2695535 | noaa-auto
+Bermuda, St. Georges Island              | bermuda-st-georges                            | BERMUDA | USA                  | 2695540 | noaa-auto
+Bermuda, St. Georges Island              | bermuda-st-georges-island                     | BERMUDA | USA                  | 2695540 | noaa-auto
+Bermuda, St. Georges Island              | bermuda-st-georges-island-bermuda             | BERMUDA | USA                  | 2695540 | noaa-auto
+Alameda                                  | alameda                                       | CA   | USA                  | 9414750 | noaa-auto
+Alameda                                  | alameda-ca                                    | CA   | USA                  | 9414750 | noaa-auto
+Arena Cove                               | arena                                         | CA   | USA                  | 9416841 | noaa-auto
+Arena Cove                               | arena-cove                                    | CA   | USA                  | 9416841 | noaa-auto
+Arena Cove                               | arena-cove-ca                                 | CA   | USA                  | 9416841 | noaa-auto
+Crescent City                            | crescent-city                                 | CA   | USA                  | 9419750 | noaa-auto
+Crescent City                            | crescent-city-ca                              | CA   | USA                  | 9419750 | noaa-auto
+La Jolla                                 | la-jolla                                      | CA   | USA                  | 9410230 | noaa-auto
+La Jolla                                 | la-jolla-ca                                   | CA   | USA                  | 9410230 | noaa-auto
+Martinez-Amorco Pier                     | martinez-amorco                               | CA   | USA                  | 9415102 | noaa-auto
+Martinez-Amorco Pier                     | martinez-amorco-pier                          | CA   | USA                  | 9415102 | noaa-auto
+Martinez-Amorco Pier                     | martinez-amorco-pier-ca                       | CA   | USA                  | 9415102 | noaa-auto
+Monterey                                 | monterey                                      | CA   | USA                  | 9413450 | noaa-auto
+Monterey                                 | monterey-ca                                   | CA   | USA                  | 9413450 | noaa-auto
+North Spit                               | north-spit                                    | CA   | USA                  | 9418767 | noaa-auto
+North Spit                               | north-spit-ca                                 | CA   | USA                  | 9418767 | noaa-auto
+Point Reyes                              | point-reyes                                   | CA   | USA                  | 9415020 | noaa-auto
+Point Reyes                              | point-reyes-ca                                | CA   | USA                  | 9415020 | noaa-auto
+Port Chicago                             | port-chicago                                  | CA   | USA                  | 9415144 | noaa-auto
+Port Chicago                             | port-chicago-ca                               | CA   | USA                  | 9415144 | noaa-auto
+Port San Luis                            | port-san-luis                                 | CA   | USA                  | 9412110 | noaa-auto
+Port San Luis                            | port-san-luis-ca                              | CA   | USA                  | 9412110 | noaa-auto
+Redwood City                             | redwood-city                                  | CA   | USA                  | 9414523 | noaa-auto
+Redwood City                             | redwood-city-ca                               | CA   | USA                  | 9414523 | noaa-auto
+Richmond                                 | richmond                                      | CA   | USA                  | 9414863 | noaa-auto
+Richmond                                 | richmond-ca                                   | CA   | USA                  | 9414863 | noaa-auto
+San Diego                                | san-diego                                     | CA   | USA                  | 9410170 | noaa-auto
+San Diego                                | san-diego-ca                                  | CA   | USA                  | 9410170 | noaa-auto
+San Francisco                            | san-francisco                                 | CA   | USA                  | 9414290 | noaa-auto
+San Francisco                            | san-francisco-ca                              | CA   | USA                  | 9414290 | noaa-auto
+Santa Monica                             | santa-monica                                  | CA   | USA                  | 9410840 | noaa-auto
+Santa Monica                             | santa-monica-ca                               | CA   | USA                  | 9410840 | noaa-auto
+Bridgeport                               | bridgeport                                    | CT   | USA                  | 8467150 | noaa-auto
+Bridgeport                               | bridgeport-ct                                 | CT   | USA                  | 8467150 | noaa-auto
+New Haven                                | new-haven                                     | CT   | USA                  | 8465705 | noaa-auto
+New Haven                                | new-haven-ct                                  | CT   | USA                  | 8465705 | noaa-auto
+New London                               | new-london                                    | CT   | USA                  | 8461490 | noaa-auto
+New London                               | new-london-ct                                 | CT   | USA                  | 8461490 | noaa-auto
+Washington                               | washington                                    | DC   | USA                  | 8594900 | noaa-auto
+Washington                               | washington-dc                                 | DC   | USA                  | 8594900 | noaa-auto
+Lewes                                    | lewes                                         | DE   | USA                  | 8557380 | noaa-auto
+Lewes                                    | lewes-de                                      | DE   | USA                  | 8557380 | noaa-auto
+Reedy Point                              | reedy                                         | DE   | USA                  | 8551910 | noaa-auto
+Reedy Point                              | reedy-point                                   | DE   | USA                  | 8551910 | noaa-auto
+Reedy Point                              | reedy-point-de                                | DE   | USA                  | 8551910 | noaa-auto
+Apalachicola                             | apalachicola                                  | FL   | USA                  | 8728690 | noaa-auto
+Apalachicola                             | apalachicola-fl                               | FL   | USA                  | 8728690 | noaa-auto
+Cedar Key                                | cedar                                         | FL   | USA                  | 8727520 | noaa-auto
+Cedar Key                                | cedar-key                                     | FL   | USA                  | 8727520 | noaa-auto
+Cedar Key                                | cedar-key-fl                                  | FL   | USA                  | 8727520 | noaa-auto
+Clearwater Beach                         | clearwater                                    | FL   | USA                  | 8726724 | noaa-auto
+Clearwater Beach                         | clearwater-beach                              | FL   | USA                  | 8726724 | noaa-auto
+Clearwater Beach                         | clearwater-beach-fl                           | FL   | USA                  | 8726724 | noaa-auto
+Dames Point                              | dames                                         | FL   | USA                  | 8720219 | noaa-auto
+Dames Point                              | dames-point                                   | FL   | USA                  | 8720219 | noaa-auto
+Dames Point                              | dames-point-fl                                | FL   | USA                  | 8720219 | noaa-auto
+East Bay                                 | east                                          | FL   | USA                  | 8726674 | noaa-auto
+East Bay                                 | east-bay                                      | FL   | USA                  | 8726674 | noaa-auto
+East Bay                                 | east-bay-fl                                   | FL   | USA                  | 8726674 | noaa-auto
+Fort Myers                               | fort-myers                                    | FL   | USA                  | 8725520 | noaa-auto
+Fort Myers                               | fort-myers-fl                                 | FL   | USA                  | 8725520 | noaa-auto
+Jacksonville University                  | jacksonville-university                       | FL   | USA                  | 8720245 | noaa-auto
+Jacksonville University                  | jacksonville-university-fl                    | FL   | USA                  | 8720245 | noaa-auto
+Key West                                 | key-west                                      | FL   | USA                  | 8724580 | noaa-auto
+Key West                                 | key-west-fl                                   | FL   | USA                  | 8724580 | noaa-auto
+Lake Worth Pier, Atlantic Ocean          | lake-worth-pier-atlantic-ocean                | FL   | USA                  | 8722670 | noaa-auto
+Lake Worth Pier, Atlantic Ocean          | lake-worth-pier-atlantic-ocean-fl             | FL   | USA                  | 8722670 | noaa-auto
+Mayport (Bar Pilots Dock)                | mayport-bar-pilots-dock                       | FL   | USA                  | 8720218 | noaa-auto
+Mayport (Bar Pilots Dock)                | mayport-bar-pilots-dock-fl                    | FL   | USA                  | 8720218 | noaa-auto
+Old Port Tampa                           | old-port-tampa                                | FL   | USA                  | 8726607 | noaa-auto
+Old Port Tampa                           | old-port-tampa-fl                             | FL   | USA                  | 8726607 | noaa-auto
+Panama City                              | panama-city                                   | FL   | USA                  | 8729108 | noaa-auto
+Panama City Beach                        | panama-city-beach                             | FL   | USA                  | 8729210 | noaa-auto
+Panama City Beach                        | panama-city-beach-fl                          | FL   | USA                  | 8729210 | noaa-auto
+Panama City                              | panama-city-fl                                | FL   | USA                  | 8729108 | noaa-auto
+Pensacola                                | pensacola                                     | FL   | USA                  | 8729840 | noaa-auto
+Pensacola                                | pensacola-fl                                  | FL   | USA                  | 8729840 | noaa-auto
+Port Manatee                             | port-manatee                                  | FL   | USA                  | 8726384 | noaa-auto
+Port Manatee                             | port-manatee-fl                               | FL   | USA                  | 8726384 | noaa-auto
+South Port Everglades                    | south-port-everglades                         | FL   | USA                  | 8722956 | noaa-auto
+South Port Everglades                    | south-port-everglades-fl                      | FL   | USA                  | 8722956 | noaa-auto
+Sparkman Channel Entrance                | sparkman-channel                              | FL   | USA                  | 8726671 | noaa-auto
+Sparkman Channel Entrance                | sparkman-channel-entrance                     | FL   | USA                  | 8726671 | noaa-auto
+Sparkman Channel Entrance                | sparkman-channel-entrance-fl                  | FL   | USA                  | 8726671 | noaa-auto
+St. Petersburg                           | st-petersburg                                 | FL   | USA                  | 8726520 | noaa-auto
+St. Petersburg                           | st-petersburg-fl                              | FL   | USA                  | 8726520 | noaa-auto
+Trident Pier, Port Canaveral             | trident-pier-port-canaveral                   | FL   | USA                  | 8721604 | noaa-auto
+Trident Pier, Port Canaveral             | trident-pier-port-canaveral-fl                | FL   | USA                  | 8721604 | noaa-auto
+Vaca Key, Florida Bay                    | vaca-key-florida                              | FL   | USA                  | 8723970 | noaa-auto
+Vaca Key, Florida Bay                    | vaca-key-florida-bay                          | FL   | USA                  | 8723970 | noaa-auto
+Vaca Key, Florida Bay                    | vaca-key-florida-bay-fl                       | FL   | USA                  | 8723970 | noaa-auto
+Virginia Key                             | virginia                                      | FL   | USA                  | 8723214 | noaa-auto
+Virginia Key                             | virginia-key                                  | FL   | USA                  | 8723214 | noaa-auto
+Virginia Key                             | virginia-key-fl                               | FL   | USA                  | 8723214 | noaa-auto
+Fort Pulaski                             | fort-pulaski                                  | GA   | USA                  | 8670870 | noaa-auto
+Fort Pulaski                             | fort-pulaski-ga                               | GA   | USA                  | 8670870 | noaa-auto
+Hilo, Hilo Bay, Kuhio Bay                | hilo-hilo-bay-kuhio                           | HI   | USA                  | 1617760 | noaa-auto
+Hilo, Hilo Bay, Kuhio Bay                | hilo-hilo-bay-kuhio-bay                       | HI   | USA                  | 1617760 | noaa-auto
+Hilo, Hilo Bay, Kuhio Bay                | hilo-hilo-bay-kuhio-bay-hi                    | HI   | USA                  | 1617760 | noaa-auto
+Honolulu                                 | honolulu                                      | HI   | USA                  | 1612340 | noaa-auto
+Honolulu                                 | honolulu-hi                                   | HI   | USA                  | 1612340 | noaa-auto
+Kahului, Kahului Harbor                  | kahului-kahului                               | HI   | USA                  | 1615680 | noaa-auto
+Kahului, Kahului Harbor                  | kahului-kahului-harbor                        | HI   | USA                  | 1615680 | noaa-auto
+Kahului, Kahului Harbor                  | kahului-kahului-harbor-hi                     | HI   | USA                  | 1615680 | noaa-auto
+Kawaihae                                 | kawaihae                                      | HI   | USA                  | 1617433 | noaa-auto
+Kawaihae                                 | kawaihae-hi                                   | HI   | USA                  | 1617433 | noaa-auto
+Mokuoloe                                 | mokuoloe                                      | HI   | USA                  | 1612480 | noaa-auto
+Mokuoloe                                 | mokuoloe-hi                                   | HI   | USA                  | 1612480 | noaa-auto
+Nawiliwili                               | nawiliwili                                    | HI   | USA                  | 1611400 | noaa-auto
+Nawiliwili                               | nawiliwili-hi                                 | HI   | USA                  | 1611400 | noaa-auto
+Berwick, Atchafalaya River               | berwick-atchafalaya                           | LA   | USA                  | 8764044 | noaa-auto
+Berwick, Atchafalaya River               | berwick-atchafalaya-river                     | LA   | USA                  | 8764044 | noaa-auto
+Berwick, Atchafalaya River               | berwick-atchafalaya-river-la                  | LA   | USA                  | 8764044 | noaa-auto
+Bulk Terminal                            | bulk-terminal                                 | LA   | USA                  | 8767961 | noaa-auto
+Bulk Terminal                            | bulk-terminal-la                              | LA   | USA                  | 8767961 | noaa-auto
+Calcasieu Pass                           | calcasieu                                     | LA   | USA                  | 8768094 | noaa-auto
+Calcasieu Pass                           | calcasieu-pass                                | LA   | USA                  | 8768094 | noaa-auto
+Calcasieu Pass                           | calcasieu-pass-la                             | LA   | USA                  | 8768094 | noaa-auto
+Carrollton                               | carrollton                                    | LA   | USA                  | 8761955 | noaa-auto
+Carrollton                               | carrollton-la                                 | LA   | USA                  | 8761955 | noaa-auto
+Eugene Island, North of, Atchafalaya Bay | eugene-island-north-of-atchafalaya            | LA   | USA                  | 8764314 | noaa-auto
+Eugene Island, North of, Atchafalaya Bay | eugene-island-north-of-atchafalaya-bay        | LA   | USA                  | 8764314 | noaa-auto
+Eugene Island, North of, Atchafalaya Bay | eugene-island-north-of-atchafalaya-bay-la     | LA   | USA                  | 8764314 | noaa-auto
+Freshwater Canal Locks                   | freshwater-canal-locks                        | LA   | USA                  | 8766072 | noaa-auto
+Freshwater Canal Locks                   | freshwater-canal-locks-la                     | LA   | USA                  | 8766072 | noaa-auto
+Grand Isle                               | grand-isle                                    | LA   | USA                  | 8761724 | noaa-auto
+Grand Isle                               | grand-isle-la                                 | LA   | USA                  | 8761724 | noaa-auto
+Lake Charles                             | lake-charles                                  | LA   | USA                  | 8767816 | noaa-auto
+Lake Charles                             | lake-charles-la                               | LA   | USA                  | 8767816 | noaa-auto
+LAWMA, Amerada Pass                      | lawma-amerada                                 | LA   | USA                  | 8764227 | noaa-auto
+LAWMA, Amerada Pass                      | lawma-amerada-pass                            | LA   | USA                  | 8764227 | noaa-auto
+LAWMA, Amerada Pass                      | lawma-amerada-pass-la                         | LA   | USA                  | 8764227 | noaa-auto
+Pilots Station East, S.W. Pass           | pilots-station-east-s-w                       | LA   | USA                  | 8760922 | noaa-auto
+Pilots Station East, S.W. Pass           | pilots-station-east-s-w-pass                  | LA   | USA                  | 8760922 | noaa-auto
+Pilots Station East, S.W. Pass           | pilots-station-east-s-w-pass-la               | LA   | USA                  | 8760922 | noaa-auto
+Pilottown                                | pilottown                                     | LA   | USA                  | 8760721 | noaa-auto
+Pilottown                                | pilottown-la                                  | LA   | USA                  | 8760721 | noaa-auto
+Shell Beach                              | shell                                         | LA   | USA                  | 8761305 | noaa-auto
+Shell Beach                              | shell-beach                                   | LA   | USA                  | 8761305 | noaa-auto
+Shell Beach                              | shell-beach-la                                | LA   | USA                  | 8761305 | noaa-auto
+West Bank 1, Bayou Gauche                | west-bank-1-bayou-gauche                      | LA   | USA                  | 8762482 | noaa-auto
+West Bank 1, Bayou Gauche                | west-bank-1-bayou-gauche-la                   | LA   | USA                  | 8762482 | noaa-auto
+Chatham                                  | chatham                                       | MA   | USA                  | 8447435 | noaa-auto
+Chatham                                  | chatham-ma                                    | MA   | USA                  | 8447435 | noaa-auto
+Fall River                               | fall                                          | MA   | USA                  | 8447386 | noaa-auto
+Fall River                               | fall-river                                    | MA   | USA                  | 8447386 | noaa-auto
+Fall River                               | fall-river-ma                                 | MA   | USA                  | 8447386 | noaa-auto
+Nantucket Island                         | nantucket                                     | MA   | USA                  | 8449130 | noaa-auto
+Nantucket Island                         | nantucket-island                              | MA   | USA                  | 8449130 | noaa-auto
+Nantucket Island                         | nantucket-island-ma                           | MA   | USA                  | 8449130 | noaa-auto
+Woods Hole                               | woods-hole                                    | MA   | USA                  | 8447930 | noaa-auto
+Woods Hole                               | woods-hole-ma                                 | MA   | USA                  | 8447930 | noaa-auto
+Annapolis                                | annapolis                                     | MD   | USA                  | 8575512 | noaa-auto
+Annapolis                                | annapolis-md                                  | MD   | USA                  | 8575512 | noaa-auto
+Baltimore                                | baltimore                                     | MD   | USA                  | 8574680 | noaa-auto
+Baltimore                                | baltimore-md                                  | MD   | USA                  | 8574680 | noaa-auto
+Bishops Head                             | bishops-head                                  | MD   | USA                  | 8571421 | noaa-auto
+Bishops Head                             | bishops-head-md                               | MD   | USA                  | 8571421 | noaa-auto
+Cambridge                                | cambridge                                     | MD   | USA                  | 8571892 | noaa-auto
+Cambridge                                | cambridge-md                                  | MD   | USA                  | 8571892 | noaa-auto
+Chesapeake City                          | chesapeake-city                               | MD   | USA                  | 8573927 | noaa-auto
+Chesapeake City                          | chesapeake-city-md                            | MD   | USA                  | 8573927 | noaa-auto
+Ocean City Inlet                         | ocean-city                                    | MD   | USA                  | 8570283 | noaa-auto
+Ocean City Inlet                         | ocean-city-inlet                              | MD   | USA                  | 8570283 | noaa-auto
+Ocean City Inlet                         | ocean-city-inlet-md                           | MD   | USA                  | 8570283 | noaa-auto
+Solomons Island                          | solomons                                      | MD   | USA                  | 8577330 | noaa-auto
+Solomons Island                          | solomons-island                               | MD   | USA                  | 8577330 | noaa-auto
+Solomons Island                          | solomons-island-md                            | MD   | USA                  | 8577330 | noaa-auto
+Tolchester Beach                         | tolchester                                    | MD   | USA                  | 8573364 | noaa-auto
+Tolchester Beach                         | tolchester-beach                              | MD   | USA                  | 8573364 | noaa-auto
+Tolchester Beach                         | tolchester-beach-md                           | MD   | USA                  | 8573364 | noaa-auto
+Bar Harbor                               | bar-harbor                                    | ME   | USA                  | 8413320 | noaa-auto
+Bar Harbor                               | bar-harbor-me                                 | ME   | USA                  | 8413320 | noaa-auto
+Cutler Farris Wharf                      | cutler-farris                                 | ME   | USA                  | 8411060 | noaa-auto
+Cutler Farris Wharf                      | cutler-farris-wharf                           | ME   | USA                  | 8411060 | noaa-auto
+Cutler Farris Wharf                      | cutler-farris-wharf-me                        | ME   | USA                  | 8411060 | noaa-auto
+Eastport                                 | eastport                                      | ME   | USA                  | 8410140 | noaa-auto
+Eastport                                 | eastport-me                                   | ME   | USA                  | 8410140 | noaa-auto
+Portland                                 | portland                                      | ME   | USA                  | 8418150 | noaa-auto
+Portland                                 | portland-me                                   | ME   | USA                  | 8418150 | noaa-auto
+Seavey Island                            | seavey                                        | ME   | USA                  | 8419870 | noaa-auto
+Seavey Island                            | seavey-island                                 | ME   | USA                  | 8419870 | noaa-auto
+Seavey Island                            | seavey-island-me                              | ME   | USA                  | 8419870 | noaa-auto
+Algonac                                  | algonac                                       | MI   | USA                  | 9014070 | noaa-auto
+Algonac                                  | algonac-mi                                    | MI   | USA                  | 9014070 | noaa-auto
+Alpena                                   | alpena                                        | MI   | USA                  | 9075065 | noaa-auto
+Alpena                                   | alpena-mi                                     | MI   | USA                  | 9075065 | noaa-auto
+De Tour Village                          | de-tour-village                               | MI   | USA                  | 9075099 | noaa-auto
+De Tour Village                          | de-tour-village-mi                            | MI   | USA                  | 9075099 | noaa-auto
+Harbor Beach                             | harbor                                        | MI   | USA                  | 9075014 | noaa-auto
+Harbor Beach                             | harbor-beach                                  | MI   | USA                  | 9075014 | noaa-auto
+Harbor Beach                             | harbor-beach-mi                               | MI   | USA                  | 9075014 | noaa-auto
+Holland                                  | holland                                       | MI   | USA                  | 9087031 | noaa-auto
+Holland                                  | holland-mi                                    | MI   | USA                  | 9087031 | noaa-auto
+Little Rapids                            | little-rapids                                 | MI   | USA                  | 9076033 | noaa-auto
+Little Rapids                            | little-rapids-mi                              | MI   | USA                  | 9076033 | noaa-auto
+Mackinaw City                            | mackinaw-city                                 | MI   | USA                  | 9075080 | noaa-auto
+Mackinaw City                            | mackinaw-city-mi                              | MI   | USA                  | 9075080 | noaa-auto
+Menominee                                | menominee                                     | MI   | USA                  | 9087088 | noaa-auto
+Menominee                                | menominee-mi                                  | MI   | USA                  | 9087088 | noaa-auto
+Port Inland                              | port-inland                                   | MI   | USA                  | 9087096 | noaa-auto
+Port Inland                              | port-inland-mi                                | MI   | USA                  | 9087096 | noaa-auto
+Rock Cut                                 | rock                                          | MI   | USA                  | 9076024 | noaa-auto
+Rock Cut                                 | rock-cut                                      | MI   | USA                  | 9076024 | noaa-auto
+Rock Cut                                 | rock-cut-mi                                   | MI   | USA                  | 9076024 | noaa-auto
+S.W. Pier, St. Marys River               | s-w-pier-st-marys                             | MI   | USA                  | 9076070 | noaa-auto
+S.W. Pier, St. Marys River               | s-w-pier-st-marys-river                       | MI   | USA                  | 9076070 | noaa-auto
+S.W. Pier, St. Marys River               | s-w-pier-st-marys-river-mi                    | MI   | USA                  | 9076070 | noaa-auto
+West Neebish Island                      | west-neebish                                  | MI   | USA                  | 9076027 | noaa-auto
+West Neebish Island                      | west-neebish-island                           | MI   | USA                  | 9076027 | noaa-auto
+West Neebish Island                      | west-neebish-island-mi                        | MI   | USA                  | 9076027 | noaa-auto
+Duluth                                   | duluth                                        | MN   | USA                  | 9099064 | noaa-auto
+Duluth                                   | duluth-mn                                     | MN   | USA                  | 9099064 | noaa-auto
+Grand Marais, Lake Superior              | grand-marais-lake-superior                    | MN   | USA                  | 9099090 | noaa-auto
+Grand Marais, Lake Superior              | grand-marais-lake-superior-mn                 | MN   | USA                  | 9099090 | noaa-auto
+Bay Waveland Yacht Club                  | bay-waveland-yacht-club                       | MS   | USA                  | 8747437 | noaa-auto
+Bay Waveland Yacht Club                  | bay-waveland-yacht-club-ms                    | MS   | USA                  | 8747437 | noaa-auto
+Pascagoula NOAA Lab                      | pascagoula-noaa-lab                           | MS   | USA                  | 8741533 | noaa-auto
+Pascagoula NOAA Lab                      | pascagoula-noaa-lab-ms                        | MS   | USA                  | 8741533 | noaa-auto
+Beaufort, Duke Marine Lab                | beaufort-duke-marine-lab                      | NC   | USA                  | 8656483 | noaa-auto
+Beaufort, Duke Marine Lab                | beaufort-duke-marine-lab-nc                   | NC   | USA                  | 8656483 | noaa-auto
+Duck                                     | duck                                          | NC   | USA                  | 8651370 | noaa-auto
+Duck                                     | duck-nc                                       | NC   | USA                  | 8651370 | noaa-auto
+JENNETTE'S PIER                          | jennette-s                                    | NC   | USA                  | 8652226 | noaa-auto
+JENNETTE'S PIER                          | jennette-s-pier                               | NC   | USA                  | 8652226 | noaa-auto
+JENNETTE'S PIER                          | jennette-s-pier-nc                            | NC   | USA                  | 8652226 | noaa-auto
+Oregon Inlet Marina                      | oregon-inlet-marina                           | NC   | USA                  | 8652587 | noaa-auto
+Oregon Inlet Marina                      | oregon-inlet-marina-nc                        | NC   | USA                  | 8652587 | noaa-auto
+USCG Station Hatteras                    | uscg-station-hatteras                         | NC   | USA                  | 8654467 | noaa-auto
+USCG Station Hatteras                    | uscg-station-hatteras-nc                      | NC   | USA                  | 8654467 | noaa-auto
+Wilmington                               | wilmington                                    | NC   | USA                  | 8658120 | noaa-auto
+Wilmington                               | wilmington-nc                                 | NC   | USA                  | 8658120 | noaa-auto
+Wrightsville Beach                       | wrightsville                                  | NC   | USA                  | 8658163 | noaa-auto
+Wrightsville Beach                       | wrightsville-beach                            | NC   | USA                  | 8658163 | noaa-auto
+Wrightsville Beach                       | wrightsville-beach-nc                         | NC   | USA                  | 8658163 | noaa-auto
+Atlantic City                            | atlantic-city                                 | NJ   | USA                  | 8534720 | noaa-auto
+Atlantic City                            | atlantic-city-nj                              | NJ   | USA                  | 8534720 | noaa-auto
+Burlington, Delaware River               | burlington-delaware                           | NJ   | USA                  | 8539094 | noaa-auto
+Burlington, Delaware River               | burlington-delaware-river                     | NJ   | USA                  | 8539094 | noaa-auto
+Burlington, Delaware River               | burlington-delaware-river-nj                  | NJ   | USA                  | 8539094 | noaa-auto
+Cape May                                 | cape-may                                      | NJ   | USA                  | 8536110 | noaa-auto
+Cape May                                 | cape-may-nj                                   | NJ   | USA                  | 8536110 | noaa-auto
+Sandy Hook                               | sandy-hook                                    | NJ   | USA                  | 8531680 | noaa-auto
+Sandy Hook                               | sandy-hook-nj                                 | NJ   | USA                  | 8531680 | noaa-auto
+Ship John Shoal                          | ship-john                                     | NJ   | USA                  | 8537121 | noaa-auto
+Ship John Shoal                          | ship-john-shoal                               | NJ   | USA                  | 8537121 | noaa-auto
+Ship John Shoal                          | ship-john-shoal-nj                            | NJ   | USA                  | 8537121 | noaa-auto
+Alexandria Bay                           | alexandria                                    | NY   | USA                  | 8311062 | noaa-auto
+Alexandria Bay                           | alexandria-bay                                | NY   | USA                  | 8311062 | noaa-auto
+Alexandria Bay                           | alexandria-bay-ny                             | NY   | USA                  | 8311062 | noaa-auto
+Buffalo                                  | buffalo                                       | NY   | USA                  | 9063020 | noaa-auto
+Buffalo                                  | buffalo-ny                                    | NY   | USA                  | 9063020 | noaa-auto
+Cape Vincent                             | cape-vincent                                  | NY   | USA                  | 9052000 | noaa-auto
+Cape Vincent                             | cape-vincent-ny                               | NY   | USA                  | 9052000 | noaa-auto
+Coxsackie, Hudson River                  | coxsackie-hudson                              | NY   | USA                  | 8518979 | noaa-auto
+Coxsackie, Hudson River                  | coxsackie-hudson-river                        | NY   | USA                  | 8518979 | noaa-auto
+Coxsackie, Hudson River                  | coxsackie-hudson-river-ny                     | NY   | USA                  | 8518979 | noaa-auto
+Kings Point                              | kings                                         | NY   | USA                  | 8516945 | noaa-auto
+Kings Point                              | kings-point                                   | NY   | USA                  | 8516945 | noaa-auto
+Kings Point                              | kings-point-ny                                | NY   | USA                  | 8516945 | noaa-auto
+Montauk                                  | montauk                                       | NY   | USA                  | 8510560 | noaa-auto
+Montauk                                  | montauk-ny                                    | NY   | USA                  | 8510560 | noaa-auto
+Ogdensburg                               | ogdensburg                                    | NY   | USA                  | 8311030 | noaa-auto
+Ogdensburg                               | ogdensburg-ny                                 | NY   | USA                  | 8311030 | noaa-auto
+The Battery                              | the-battery                                   | NY   | USA                  | 8518750 | noaa-auto
+The Battery                              | the-battery-ny                                | NY   | USA                  | 8518750 | noaa-auto
+Turkey Point Hudson River NERRS          | turkey-point-hudson-river-nerrs               | NY   | USA                  | 8518962 | noaa-auto
+Turkey Point Hudson River NERRS          | turkey-point-hudson-river-nerrs-ny            | NY   | USA                  | 8518962 | noaa-auto
+Cleveland                                | cleveland                                     | OH   | USA                  | 9063063 | noaa-auto
+Cleveland                                | cleveland-oh                                  | OH   | USA                  | 9063063 | noaa-auto
+Fairport                                 | fairport                                      | OH   | USA                  | 9063053 | noaa-auto
+Fairport                                 | fairport-oh                                   | OH   | USA                  | 9063053 | noaa-auto
+Marblehead                               | marblehead                                    | OH   | USA                  | 9063079 | noaa-auto
+Marblehead                               | marblehead-oh                                 | OH   | USA                  | 9063079 | noaa-auto
+Toledo                                   | toledo                                        | OH   | USA                  | 9063085 | noaa-auto
+Toledo                                   | toledo-oh                                     | OH   | USA                  | 9063085 | noaa-auto
+Charleston                               | charleston-or                                 | OR   | USA                  | 9432780 | noaa-auto
+Port Orford                              | port-orford                                   | OR   | USA                  | 9431647 | noaa-auto
+Port Orford                              | port-orford-or                                | OR   | USA                  | 9431647 | noaa-auto
+South Beach                              | south                                         | OR   | USA                  | 9435380 | noaa-auto
+South Beach                              | south-beach                                   | OR   | USA                  | 9435380 | noaa-auto
+South Beach                              | south-beach-or                                | OR   | USA                  | 9435380 | noaa-auto
+Bridesburg                               | bridesburg                                    | PA   | USA                  | 8546252 | noaa-auto
+Bridesburg                               | bridesburg-pa                                 | PA   | USA                  | 8546252 | noaa-auto
+Marcus Hook                              | marcus-hook                                   | PA   | USA                  | 8540433 | noaa-auto
+Marcus Hook                              | marcus-hook-pa                                | PA   | USA                  | 8540433 | noaa-auto
+Newbold                                  | newbold                                       | PA   | USA                  | 8548989 | noaa-auto
+Newbold                                  | newbold-pa                                    | PA   | USA                  | 8548989 | noaa-auto
+Philadelphia                             | philadelphia                                  | PA   | USA                  | 8545240 | noaa-auto
+Philadelphia                             | philadelphia-pa                               | PA   | USA                  | 8545240 | noaa-auto
+Culebra                                  | culebra                                       | PR   | USA (Territory)      | 9752235 | noaa-auto
+Culebra                                  | culebra-pr                                    | PR   | USA (Territory)      | 9752235 | noaa-auto
+Esperanza, Vieques Island                | esperanza-vieques                             | PR   | USA (Territory)      | 9752695 | noaa-auto
+Esperanza, Vieques Island                | esperanza-vieques-island                      | PR   | USA (Territory)      | 9752695 | noaa-auto
+Esperanza, Vieques Island                | esperanza-vieques-island-pr                   | PR   | USA (Territory)      | 9752695 | noaa-auto
+Fajardo                                  | fajardo                                       | PR   | USA (Territory)      | 9753216 | noaa-auto
+Fajardo                                  | fajardo-pr                                    | PR   | USA (Territory)      | 9753216 | noaa-auto
+Magueyes Island                          | magueyes                                      | PR   | USA (Territory)      | 9759110 | noaa-auto
+Magueyes Island                          | magueyes-island                               | PR   | USA (Territory)      | 9759110 | noaa-auto
+Magueyes Island                          | magueyes-island-pr                            | PR   | USA (Territory)      | 9759110 | noaa-auto
+Mayaguez                                 | mayaguez                                      | PR   | USA (Territory)      | 9759394 | noaa-auto
+Mayaguez                                 | mayaguez-pr                                   | PR   | USA (Territory)      | 9759394 | noaa-auto
+Mona Island                              | mona                                          | PR   | USA (Territory)      | 9759938 | noaa-auto
+Mona Island                              | mona-island                                   | PR   | USA (Territory)      | 9759938 | noaa-auto
+Mona Island                              | mona-island-pr                                | PR   | USA (Territory)      | 9759938 | noaa-auto
+San Juan, La Puntilla, San Juan Bay      | san-juan-la-puntilla-san-juan                 | PR   | USA (Territory)      | 9755371 | noaa-auto
+San Juan, La Puntilla, San Juan Bay      | san-juan-la-puntilla-san-juan-bay             | PR   | USA (Territory)      | 9755371 | noaa-auto
+San Juan, La Puntilla, San Juan Bay      | san-juan-la-puntilla-san-juan-bay-pr          | PR   | USA (Territory)      | 9755371 | noaa-auto
+Conimicut Light                          | conimicut                                     | RI   | USA                  | 8452944 | noaa-auto
+Conimicut Light                          | conimicut-light                               | RI   | USA                  | 8452944 | noaa-auto
+Conimicut Light                          | conimicut-light-ri                            | RI   | USA                  | 8452944 | noaa-auto
+Newport                                  | newport                                       | RI   | USA                  | 8452660 | noaa-auto
+Newport                                  | newport-ri                                    | RI   | USA                  | 8452660 | noaa-auto
+Providence                               | providence                                    | RI   | USA                  | 8454000 | noaa-auto
+Providence                               | providence-ri                                 | RI   | USA                  | 8454000 | noaa-auto
+Charleston                               | charleston                                    | SC   | USA                  | 8665530 | noaa-auto
+Charleston                               | charleston-sc                                 | SC   | USA                  | 8665530 | noaa-auto
+Springmaid Pier                          | springmaid                                    | SC   | USA                  | 8661070 | noaa-auto
+Springmaid Pier                          | springmaid-pier                               | SC   | USA                  | 8661070 | noaa-auto
+Springmaid Pier                          | springmaid-pier-sc                            | SC   | USA                  | 8661070 | noaa-auto
+Aransas, Aransas Pass                    | aransas-aransas                               | TX   | USA                  | 8775241 | noaa-auto
+Aransas, Aransas Pass                    | aransas-aransas-pass                          | TX   | USA                  | 8775241 | noaa-auto
+Aransas, Aransas Pass                    | aransas-aransas-pass-tx                       | TX   | USA                  | 8775241 | noaa-auto
+Aransas Wildlife Refuge                  | aransas-wildlife-refuge                       | TX   | USA                  | 8774230 | noaa-auto
+Aransas Wildlife Refuge                  | aransas-wildlife-refuge-tx                    | TX   | USA                  | 8774230 | noaa-auto
+Baffin Bay                               | baffin                                        | TX   | USA                  | 8776604 | noaa-auto
+Baffin Bay                               | baffin-bay                                    | TX   | USA                  | 8776604 | noaa-auto
+Baffin Bay                               | baffin-bay-tx                                 | TX   | USA                  | 8776604 | noaa-auto
+Copano Bay                               | copano                                        | TX   | USA                  | 8774513 | noaa-auto
+Copano Bay                               | copano-bay                                    | TX   | USA                  | 8774513 | noaa-auto
+Copano Bay                               | copano-bay-tx                                 | TX   | USA                  | 8774513 | noaa-auto
+Eagle Point, Galveston Bay               | eagle-point-galveston                         | TX   | USA                  | 8771013 | noaa-auto
+Eagle Point, Galveston Bay               | eagle-point-galveston-bay                     | TX   | USA                  | 8771013 | noaa-auto
+Eagle Point, Galveston Bay               | eagle-point-galveston-bay-tx                  | TX   | USA                  | 8771013 | noaa-auto
+Enbridge, Ingleside                      | enbridge-ingleside                            | TX   | USA                  | 8775283 | noaa-auto
+Enbridge, Ingleside                      | enbridge-ingleside-tx                         | TX   | USA                  | 8775283 | noaa-auto
+Freeport Harbor                          | freeport                                      | TX   | USA                  | 8772471 | noaa-auto
+Freeport Harbor                          | freeport-harbor                               | TX   | USA                  | 8772471 | noaa-auto
+Freeport Harbor                          | freeport-harbor-tx                            | TX   | USA                  | 8772471 | noaa-auto
+Galveston Bay Entrance, North Jetty      | galveston-bay-entrance-north-jetty            | TX   | USA                  | 8771341 | noaa-auto
+Galveston Bay Entrance, North Jetty      | galveston-bay-entrance-north-jetty-tx         | TX   | USA                  | 8771341 | noaa-auto
+Galveston Pier 21                        | galveston-pier-21                             | TX   | USA                  | 8771450 | noaa-auto
+Galveston Pier 21                        | galveston-pier-21-tx                          | TX   | USA                  | 8771450 | noaa-auto
+Galveston Railroad Bridge                | galveston-railroad                            | TX   | USA                  | 8771486 | noaa-auto
+Galveston Railroad Bridge                | galveston-railroad-bridge                     | TX   | USA                  | 8771486 | noaa-auto
+Galveston Railroad Bridge                | galveston-railroad-bridge-tx                  | TX   | USA                  | 8771486 | noaa-auto
+High Island                              | high                                          | TX   | USA                  | 8770808 | noaa-auto
+High Island                              | high-island                                   | TX   | USA                  | 8770808 | noaa-auto
+High Island                              | high-island-tx                                | TX   | USA                  | 8770808 | noaa-auto
+La Quinta Channel North                  | la-quinta-channel-north                       | TX   | USA                  | 8775132 | noaa-auto
+La Quinta Channel North                  | la-quinta-channel-north-tx                    | TX   | USA                  | 8775132 | noaa-auto
+Manchester                               | manchester                                    | TX   | USA                  | 8770777 | noaa-auto
+Manchester                               | manchester-tx                                 | TX   | USA                  | 8770777 | noaa-auto
+Matagorda Bay Entrance Channel           | matagorda-bay-entrance                        | TX   | USA                  | 8773767 | noaa-auto
+Matagorda Bay Entrance Channel           | matagorda-bay-entrance-channel                | TX   | USA                  | 8773767 | noaa-auto
+Matagorda Bay Entrance Channel           | matagorda-bay-entrance-channel-tx             | TX   | USA                  | 8773767 | noaa-auto
+Matagorda City                           | matagorda-city                                | TX   | USA                  | 8773146 | noaa-auto
+Matagorda City                           | matagorda-city-tx                             | TX   | USA                  | 8773146 | noaa-auto
+Morgans Point, Barbours Cut              | morgans-point-barbours                        | TX   | USA                  | 8770613 | noaa-auto
+Morgans Point, Barbours Cut              | morgans-point-barbours-cut                    | TX   | USA                  | 8770613 | noaa-auto
+Morgans Point, Barbours Cut              | morgans-point-barbours-cut-tx                 | TX   | USA                  | 8770613 | noaa-auto
+Packery Channel                          | packery                                       | TX   | USA                  | 8775792 | noaa-auto
+Packery Channel                          | packery-channel                               | TX   | USA                  | 8775792 | noaa-auto
+Packery Channel                          | packery-channel-tx                            | TX   | USA                  | 8775792 | noaa-auto
+Port Aransas                             | port-aransas                                  | TX   | USA                  | 8775237 | noaa-auto
+Port Aransas                             | port-aransas-tx                               | TX   | USA                  | 8775237 | noaa-auto
+Port Arthur                              | port-arthur                                   | TX   | USA                  | 8770475 | noaa-auto
+Port Arthur                              | port-arthur-tx                                | TX   | USA                  | 8770475 | noaa-auto
+Port Isabel                              | port-isabel                                   | TX   | USA                  | 8779770 | noaa-auto
+Port Isabel                              | port-isabel-tx                                | TX   | USA                  | 8779770 | noaa-auto
+Port Lavaca                              | port-lavaca                                   | TX   | USA                  | 8773259 | noaa-auto
+Port Lavaca                              | port-lavaca-tx                                | TX   | USA                  | 8773259 | noaa-auto
+Port Mansfield                           | port-mansfield                                | TX   | USA                  | 8778490 | noaa-auto
+Port Mansfield                           | port-mansfield-tx                             | TX   | USA                  | 8778490 | noaa-auto
+Port O'Connor                            | port-o-connor                                 | TX   | USA                  | 8773701 | noaa-auto
+Port O'Connor                            | port-o-connor-tx                              | TX   | USA                  | 8773701 | noaa-auto
+Realitos Peninsula                       | realitos-peninsula                            | TX   | USA                  | 8779280 | noaa-auto
+Realitos Peninsula                       | realitos-peninsula-tx                         | TX   | USA                  | 8779280 | noaa-auto
+Rincon Del San Jose                      | rincon-del-san-jose                           | TX   | USA                  | 8777812 | noaa-auto
+Rincon Del San Jose                      | rincon-del-san-jose-tx                        | TX   | USA                  | 8777812 | noaa-auto
+Rockport                                 | rockport                                      | TX   | USA                  | 8774770 | noaa-auto
+Rockport                                 | rockport-tx                                   | TX   | USA                  | 8774770 | noaa-auto
+Rollover Pass                            | rollover                                      | TX   | USA                  | 8770971 | noaa-auto
+Rollover Pass                            | rollover-pass                                 | TX   | USA                  | 8770971 | noaa-auto
+Rollover Pass                            | rollover-pass-tx                              | TX   | USA                  | 8770971 | noaa-auto
+S. Bird Island                           | s-bird                                        | TX   | USA                  | 8776139 | noaa-auto
+S. Bird Island                           | s-bird-island                                 | TX   | USA                  | 8776139 | noaa-auto
+S. Bird Island                           | s-bird-island-tx                              | TX   | USA                  | 8776139 | noaa-auto
+San Luis Pass                            | san-luis                                      | TX   | USA                  | 8771972 | noaa-auto
+San Luis Pass                            | san-luis-pass                                 | TX   | USA                  | 8771972 | noaa-auto
+San Luis Pass                            | san-luis-pass-tx                              | TX   | USA                  | 8771972 | noaa-auto
+Seadrift                                 | seadrift                                      | TX   | USA                  | 8773037 | noaa-auto
+Seadrift                                 | seadrift-tx                                   | TX   | USA                  | 8773037 | noaa-auto
+South Padre Island CG Station            | south-padre-island-cg                         | TX   | USA                  | 8779748 | noaa-auto
+South Padre Island CG Station            | south-padre-island-cg-station                 | TX   | USA                  | 8779748 | noaa-auto
+South Padre Island CG Station            | south-padre-island-cg-station-tx              | TX   | USA                  | 8779748 | noaa-auto
+SPI Brazos Santiago                      | spi-brazos-santiago                           | TX   | USA                  | 8779749 | noaa-auto
+SPI Brazos Santiago                      | spi-brazos-santiago-tx                        | TX   | USA                  | 8779749 | noaa-auto
+Texas Point, Sabine Pass                 | texas-point-sabine                            | TX   | USA                  | 8770822 | noaa-auto
+Texas Point, Sabine Pass                 | texas-point-sabine-pass                       | TX   | USA                  | 8770822 | noaa-auto
+Texas Point, Sabine Pass                 | texas-point-sabine-pass-tx                    | TX   | USA                  | 8770822 | noaa-auto
+USS Lexington, Corpus Christi Bay        | uss-lexington-corpus-christi                  | TX   | USA                  | 8775296 | noaa-auto
+USS Lexington, Corpus Christi Bay        | uss-lexington-corpus-christi-bay              | TX   | USA                  | 8775296 | noaa-auto
+USS Lexington, Corpus Christi Bay        | uss-lexington-corpus-christi-bay-tx           | TX   | USA                  | 8775296 | noaa-auto
+Viola Turning Basin                      | viola-turning-basin                           | TX   | USA                  | 8775222 | noaa-auto
+Viola Turning Basin                      | viola-turning-basin-tx                        | TX   | USA                  | 8775222 | noaa-auto
+Apra Harbor, Guam                        | apra-harbor-guam                              | UNITED STATES OF AMERICA | USA                  | 1630000 | noaa-auto
+Apra Harbor, Guam                        | apra-harbor-guam-united states of america     | UNITED STATES OF AMERICA | USA                  | 1630000 | noaa-auto
+Kwajalein, Marshall Islands              | kwajalein-marshall-islands                    | UNITED STATES OF AMERICA | USA                  | 1820000 | noaa-auto
+Kwajalein, Marshall Islands              | kwajalein-marshall-islands-united states of america | UNITED STATES OF AMERICA | USA                  | 1820000 | noaa-auto
+Sand Island, Midway Islands              | sand-island-midway-islands                    | UNITED STATES OF AMERICA | USA                  | 1619910 | noaa-auto
+Sand Island, Midway Islands              | sand-island-midway-islands-united states of america | UNITED STATES OF AMERICA | USA                  | 1619910 | noaa-auto
+Wake Island, Pacific Ocean               | wake-island-pacific-ocean                     | UNITED STATES OF AMERICA | USA                  | 1890000 | noaa-auto
+Wake Island, Pacific Ocean               | wake-island-pacific-ocean-united states of america | UNITED STATES OF AMERICA | USA                  | 1890000 | noaa-auto
+Dahlgren                                 | dahlgren                                      | VA   | USA                  | 8635027 | noaa-auto
+Dahlgren                                 | dahlgren-va                                   | VA   | USA                  | 8635027 | noaa-auto
+Kiptopeke                                | kiptopeke                                     | VA   | USA                  | 8632200 | noaa-auto
+Kiptopeke                                | kiptopeke-va                                  | VA   | USA                  | 8632200 | noaa-auto
+Lewisetta                                | lewisetta                                     | VA   | USA                  | 8635750 | noaa-auto
+Lewisetta                                | lewisetta-va                                  | VA   | USA                  | 8635750 | noaa-auto
+Money Point                              | money                                         | VA   | USA                  | 8639348 | noaa-auto
+Money Point                              | money-point                                   | VA   | USA                  | 8639348 | noaa-auto
+Money Point                              | money-point-va                                | VA   | USA                  | 8639348 | noaa-auto
+Sewells Point                            | sewells                                       | VA   | USA                  | 8638610 | noaa-auto
+Sewells Point                            | sewells-point                                 | VA   | USA                  | 8638610 | noaa-auto
+Sewells Point                            | sewells-point-va                              | VA   | USA                  | 8638610 | noaa-auto
+Wachapreague                             | wachapreague                                  | VA   | USA                  | 8631044 | noaa-auto
+Wachapreague                             | wachapreague-va                               | VA   | USA                  | 8631044 | noaa-auto
+Yorktown USCG Training Center            | yorktown-uscg-training-center                 | VA   | USA                  | 8637689 | noaa-auto
+Yorktown USCG Training Center            | yorktown-uscg-training-center-va              | VA   | USA                  | 8637689 | noaa-auto
+Christiansted Harbor, St Croix           | christiansted-harbor-st-croix                 | VI   | USA (Territory)      | 9751364 | noaa-auto
+Christiansted Harbor, St Croix           | christiansted-harbor-st-croix-vi              | VI   | USA (Territory)      | 9751364 | noaa-auto
+Lameshur Bay, St John                    | lameshur-bay-st-john                          | VI   | USA (Territory)      | 9751381 | noaa-auto
+Lameshur Bay, St John                    | lameshur-bay-st-john-vi                       | VI   | USA (Territory)      | 9751381 | noaa-auto
+Limetree Bay                             | limetree                                      | VI   | USA (Territory)      | 9751401 | noaa-auto
+Limetree Bay                             | limetree-bay                                  | VI   | USA (Territory)      | 9751401 | noaa-auto
+Limetree Bay                             | limetree-bay-vi                               | VI   | USA (Territory)      | 9751401 | noaa-auto
+Friday Harbor                            | friday                                        | WA   | USA                  | 9449880 | noaa-auto
+Friday Harbor                            | friday-harbor                                 | WA   | USA                  | 9449880 | noaa-auto
+Friday Harbor                            | friday-harbor-wa                              | WA   | USA                  | 9449880 | noaa-auto
+La Push, Quillayute River                | la-push-quillayute                            | WA   | USA                  | 9442396 | noaa-auto
+La Push, Quillayute River                | la-push-quillayute-river                      | WA   | USA                  | 9442396 | noaa-auto
+La Push, Quillayute River                | la-push-quillayute-river-wa                   | WA   | USA                  | 9442396 | noaa-auto
+Longview                                 | longview                                      | WA   | USA                  | 9440422 | noaa-auto
+Longview                                 | longview-wa                                   | WA   | USA                  | 9440422 | noaa-auto
+Neah Bay                                 | neah                                          | WA   | USA                  | 9443090 | noaa-auto
+Neah Bay                                 | neah-bay                                      | WA   | USA                  | 9443090 | noaa-auto
+Neah Bay                                 | neah-bay-wa                                   | WA   | USA                  | 9443090 | noaa-auto
+Port Angeles                             | port-angeles                                  | WA   | USA                  | 9444090 | noaa-auto
+Port Angeles                             | port-angeles-wa                               | WA   | USA                  | 9444090 | noaa-auto
+Port Townsend                            | port-townsend                                 | WA   | USA                  | 9444900 | noaa-auto
+Port Townsend                            | port-townsend-wa                              | WA   | USA                  | 9444900 | noaa-auto
+Tacoma                                   | tacoma                                        | WA   | USA                  | 9446484 | noaa-auto
+Tacoma                                   | tacoma-wa                                     | WA   | USA                  | 9446484 | noaa-auto
+Toke Point                               | toke                                          | WA   | USA                  | 9440910 | noaa-auto
+Toke Point                               | toke-point                                    | WA   | USA                  | 9440910 | noaa-auto
+Toke Point                               | toke-point-wa                                 | WA   | USA                  | 9440910 | noaa-auto
+Westport                                 | westport                                      | WA   | USA                  | 9441102 | noaa-auto
+Westport                                 | westport-wa                                   | WA   | USA                  | 9441102 | noaa-auto

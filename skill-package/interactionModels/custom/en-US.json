@@ -69,11 +69,47 @@
             "select {Choice}"
           ]
         },
-        { "name": "AMAZON.HelpIntent",         "samples": [] },
-        { "name": "AMAZON.CancelIntent",        "samples": [] },
-        { "name": "AMAZON.StopIntent",          "samples": [] },
-        { "name": "AMAZON.FallbackIntent",      "samples": [] },
-        { "name": "AMAZON.NavigateHomeIntent",  "samples": [] }
+        { "name": "AMAZON.YesIntent",  "samples": [] },
+        { "name": "AMAZON.NoIntent",   "samples": [] },
+        {
+          "name": "LocalShopIntent",
+          "slots": [],
+          "samples": [
+            "local",
+            "local shop",
+            "bait shop",
+            "nearby shop",
+            "the shop",
+            "local bait shop",
+            "nearby",
+            "a local shop",
+            "find a shop",
+            "shop nearby",
+            "tackle shop"
+          ]
+        },
+        {
+          "name": "AmazonGearIntent",
+          "slots": [],
+          "samples": [
+            "Amazon",
+            "gear",
+            "Amazon gear",
+            "recommend gear",
+            "online",
+            "recommend something",
+            "Amazon recommendation",
+            "something from Amazon",
+            "from Amazon",
+            "buy on Amazon",
+            "shop on Amazon"
+          ]
+        },
+        { "name": "AMAZON.HelpIntent",           "samples": [] },
+        { "name": "AMAZON.CancelIntent",         "samples": [] },
+        { "name": "AMAZON.StopIntent",           "samples": [] },
+        { "name": "AMAZON.FallbackIntent",       "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent",   "samples": [] }
       ],
       "types": [
         {

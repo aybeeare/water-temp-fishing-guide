@@ -55,6 +55,7 @@ def lambda_handler(event, context):
 def handle_intent(event):
     intent_name   = event["request"]["intent"]["name"]
     session_attrs = event.get("session", {}).get("attributes", {})
+    print(f"INTENT={intent_name} SESSION={json.dumps(session_attrs)}")
 
     # ── GetFishingGuideIntent — fetch data, speak temp only ──────────────────
     if intent_name == "GetFishingGuideIntent":
@@ -190,13 +191,21 @@ def fetch_and_open(location):
         if e.code == 404:
             return speak(
                 f"I couldn't find water temperature data for {location}. "
-                "Try a nearby location or check the spelling."
+                "Try a nearby lake, river, or coastal location.",
+                end_session=False,
+                session_attributes={},
             )
         return speak(
-            "I'm having trouble reaching the water temperature service. Please try again."
+            "I'm having trouble reaching the water temperature service. Please try again.",
+            end_session=False,
+            session_attributes={},
         )
     except Exception:
-        return speak("Something went wrong fetching the water temperature. Please try again.")
+        return speak(
+            "Something went wrong fetching the water temperature. Please try again.",
+            end_session=False,
+            session_attributes={},
+        )
 
     if data.get("disambiguation"):
         return speak(data["spoken_response"], end_session=False)
@@ -207,13 +216,23 @@ def fetch_and_open(location):
 
     if temp_f is None:
         return speak(
-            data.get("spoken_response", f"No temperature data is available for {location}.")
+            data.get("spoken_response", f"No temperature data is available for {location}."),
+            end_session=False,
+            session_attributes={},
         )
 
-    temp_speech = (
-        f"The current water temperature at {site_name} is "
-        f"{temp_f} degrees Fahrenheit, or {temp_c} degrees Celsius."
-    )
+    temp_f_min = data.get("temp_f_min")
+    temp_f_max = data.get("temp_f_max")
+    if temp_f_min and temp_f_max:
+        temp_speech = (
+            f"Water temperatures at {site_name} today range from "
+            f"{temp_f_min} to {temp_f_max} degrees Fahrenheit across the lake."
+        )
+    else:
+        temp_speech = (
+            f"The current water temperature at {site_name} is "
+            f"{temp_f} degrees Fahrenheit, or {temp_c} degrees Celsius."
+        )
 
     # Objective species report — no pre-written behavioral commentary
     species = data.get("species") or []

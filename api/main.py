@@ -72,6 +72,8 @@ class FishingGuideResponse(BaseModel):
     site_name:             str
     temp_f:                Optional[float]
     temp_c:                Optional[float]
+    temp_f_min:            Optional[float]         = None
+    temp_f_max:            Optional[float]         = None
     data_freshness:        str
     spoken_response:       str
     sponsor_script:        str
@@ -314,11 +316,17 @@ async def fishing_guide(
         water = await resolve_scrape(resolved_id)
 
     if water is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No temperature data found for '{resolved_id}'. "
-                   "Try a nearby location or check the spelling.",
-        )
+        # Primary source offline or no data — try seatemperature.info as fallback
+        scrape_slug = normalize_location(location) if location else normalize_location(resolved_id)
+        water = await resolve_scrape(scrape_slug)
+        if water is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No temperature data found for '{resolved_id}'. "
+                       "Try a nearby location or check the spelling.",
+            )
+        source      = "scrape"
+        resolved_id = scrape_slug
 
     temp_f    = water["temp_f"]
     temp_c    = water["temp_c"]
@@ -384,6 +392,8 @@ async def fishing_guide(
         site_name           = site_name,
         temp_f              = temp_f,
         temp_c              = temp_c,
+        temp_f_min          = water["temp_f_min"] if "temp_f_min" in water.keys() else None,
+        temp_f_max          = water["temp_f_max"] if "temp_f_max" in water.keys() else None,
         data_freshness      = fetched,
         spoken_response     = spoken,
         sponsor_script      = sponsor_script,

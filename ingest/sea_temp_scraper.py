@@ -113,13 +113,23 @@ def extract_temperature(html: str) -> Optional[dict]:
             if result:
                 return result
 
-    # Strategy 2 — degree symbols in full body text
+    # Strategy 2 — warmest/coldest range (large water bodies like Great Lakes)
     body_text = soup.get_text(" ", strip=True)
+    w = re.search(r'warmest.*?(\d{2,3}(?:\.\d)?)\s*°?\s*F', body_text, re.IGNORECASE)
+    c = re.search(r'coldest.*?(\d{2,3}(?:\.\d)?)\s*°?\s*F', body_text, re.IGNORECASE)
+    if w and c:
+        temp_f_max = round(float(w.group(1)), 1)
+        temp_f_min = round(float(c.group(1)), 1)
+        avg_f      = round((temp_f_max + temp_f_min) / 2, 1)
+        avg_c      = round((avg_f - 32) * 5 / 9, 2)
+        return {"temp_f": avg_f, "temp_c": avg_c, "temp_f_min": temp_f_min, "temp_f_max": temp_f_max}
+
+    # Strategy 3 — first degree symbol in full body text (single-point pages)
     result = parse_temperature(body_text)
     if result:
         return result
 
-    # Strategy 3 — table row containing "today / current / now"
+    # Strategy 4 — table row containing "today / current / now"
     for row in soup.find_all("tr"):
         row_text = row.get_text()
         if not re.search(r"today|current|now", row_text, re.IGNORECASE):
@@ -189,15 +199,19 @@ def scrape_and_cache(slug: str, full_path: Optional[str] = None) -> Optional[dic
     now_utc = datetime.now(timezone.utc).isoformat()
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
-        """INSERT INTO water_cache (site_id, site_name, temp_f, temp_c, fetched_at, raw_datetime)
-           VALUES (?, ?, ?, ?, ?, ?)
+        """INSERT INTO water_cache
+               (site_id, site_name, temp_f, temp_c, temp_f_min, temp_f_max, fetched_at, raw_datetime)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(site_id) DO UPDATE SET
-               site_name  = excluded.site_name,
-               temp_f     = excluded.temp_f,
-               temp_c     = excluded.temp_c,
-               fetched_at = excluded.fetched_at,
+               site_name    = excluded.site_name,
+               temp_f       = excluded.temp_f,
+               temp_c       = excluded.temp_c,
+               temp_f_min   = excluded.temp_f_min,
+               temp_f_max   = excluded.temp_f_max,
+               fetched_at   = excluded.fetched_at,
                raw_datetime = excluded.raw_datetime""",
-        (slug, data["site_name"], data["temp_f"], data["temp_c"], now_utc, now_utc),
+        (slug, data["site_name"], data["temp_f"], data["temp_c"],
+         data.get("temp_f_min"), data.get("temp_f_max"), now_utc, now_utc),
     )
     conn.commit()
     conn.close()
