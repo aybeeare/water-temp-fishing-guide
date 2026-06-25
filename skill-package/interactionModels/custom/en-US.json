@@ -33,6 +33,12 @@
             "what about {WaterBody} instead",
             "how about {WaterBody} instead",
             "what about conditions at {WaterBody}",
+            "what about {WaterBody} then",
+            "what about {WaterBody} conditions",
+            "what about the temperature at {WaterBody}",
+            "what about water temperature at {WaterBody}",
+            "and what about {WaterBody}",
+            "now what about {WaterBody}",
             "try {WaterBody}",
             "switch to {WaterBody}",
             "{WaterBody}"
