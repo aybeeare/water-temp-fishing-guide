@@ -55,7 +55,8 @@ def lambda_handler(event, context):
 def handle_intent(event):
     intent_name   = event["request"]["intent"]["name"]
     session_attrs = event.get("session", {}).get("attributes", {})
-    print(f"INTENT={intent_name} SESSION={json.dumps(session_attrs)}")
+    # DEBUG: uncomment to log intent + session state to CloudWatch
+    # print(f"INTENT={intent_name} SESSION={json.dumps(session_attrs)}")
 
     # ── GetFishingGuideIntent — fetch data, speak temp only ──────────────────
     if intent_name == "GetFishingGuideIntent":
