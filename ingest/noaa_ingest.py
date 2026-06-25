@@ -110,12 +110,21 @@ def fetch_noaa_temperature(station_id: str) -> Optional[dict]:
         "date":      "latest",
         "time_zone": "gmt",
     }
-    try:
-        resp = httpx.get(NOAA_BASE, params=params, timeout=10)
-        resp.raise_for_status()
-        body = resp.json()
-    except httpx.HTTPError as exc:
-        log.error("NOAA temp HTTP error for %s: %s", station_id, exc)
+    last_exc = None
+    for attempt in range(3):
+        if attempt:
+            import time
+            time.sleep(0.5 * attempt)  # 0.5s, then 1s
+        try:
+            resp = httpx.get(NOAA_BASE, params=params, timeout=10)
+            resp.raise_for_status()
+            body = resp.json()
+            break
+        except httpx.HTTPError as exc:
+            log.warning("NOAA temp HTTP error for %s (attempt %d/3): %s", station_id, attempt + 1, exc)
+            last_exc = exc
+    else:
+        log.error("NOAA temp failed after 3 attempts for %s: %s", station_id, last_exc)
         return None
 
     if "error" in body:
@@ -146,12 +155,21 @@ def fetch_noaa_tides(station_id: str) -> list[dict]:
         "time_zone": "lst_ldt",
         "interval":  "hilo",
     }
-    try:
-        resp = httpx.get(NOAA_BASE, params=params, timeout=10)
-        resp.raise_for_status()
-        body = resp.json()
-    except httpx.HTTPError as exc:
-        log.error("NOAA tides HTTP error for %s: %s", station_id, exc)
+    last_exc = None
+    for attempt in range(3):
+        if attempt:
+            import time
+            time.sleep(0.5 * attempt)
+        try:
+            resp = httpx.get(NOAA_BASE, params=params, timeout=10)
+            resp.raise_for_status()
+            body = resp.json()
+            break
+        except httpx.HTTPError as exc:
+            log.warning("NOAA tides HTTP error for %s (attempt %d/3): %s", station_id, attempt + 1, exc)
+            last_exc = exc
+    else:
+        log.error("NOAA tides failed after 3 attempts for %s: %s", station_id, last_exc)
         return []
 
     if "error" in body:
