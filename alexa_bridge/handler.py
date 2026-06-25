@@ -123,7 +123,9 @@ def handle_intent(event):
 
     # ── LocalShopIntent ───────────────────────────────────────────────────────
     if intent_name == "LocalShopIntent":
-        if not session_attrs.get("awaiting_shop_choice"):
+        # Allow re-entry any time we have session data, not just when awaiting_shop_choice
+        has_session = session_attrs.get("pending_shop_speech") or session_attrs.get("pending_gear_name")
+        if not session_attrs.get("awaiting_shop_choice") and not has_session:
             return speak("Try asking for water temperature at a location first.", end_session=False)
         shop_speech = session_attrs.get("pending_shop_speech")
         if not shop_speech:
@@ -153,7 +155,9 @@ def handle_intent(event):
 
     # ── AmazonGearIntent ─────────────────────────────────────────────────────
     if intent_name == "AmazonGearIntent":
-        if not session_attrs.get("awaiting_shop_choice"):
+        # Allow re-entry any time we have gear data in session
+        has_session = session_attrs.get("pending_gear_name") or session_attrs.get("pending_asin")
+        if not session_attrs.get("awaiting_shop_choice") and not has_session:
             return speak("Try asking for water temperature at a location first.", end_session=False)
         return _offer_amazon_gear(session_attrs)
 
