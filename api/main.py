@@ -440,6 +440,49 @@ def _disambiguation_response(slug: str, location: str, disambig: list) -> Fishin
 
 
 # ---------------------------------------------------------------------------
+# MCP server card — lets Smithery skip live scanning when 421 occurs
+# ---------------------------------------------------------------------------
+
+@app.get("/.well-known/mcp/server-card.json", include_in_schema=False)
+async def mcp_server_card():
+    return {
+        "serverInfo": {
+            "name": "water-conditions",
+            "version": "1.0.0",
+        },
+        "authentication": {
+            "required": False,
+        },
+        "tools": [
+            {
+                "name": "get_water_conditions",
+                "description": (
+                    "Get real-time water temperature and tide predictions for any lake, river, "
+                    "ocean, bay, or beach location. Data sourced live from NOAA CO-OPS, USGS, "
+                    "and seatemperature.info — not from training data. "
+                    "Coverage: 8,000+ locations across North America and major international bodies."
+                ),
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "location": {
+                            "type": "string",
+                            "description": (
+                                "Water body name as natural language. Examples: 'Lake Michigan', "
+                                "'Revere Beach', 'Chesapeake Bay', 'Galveston Island', 'Puget Sound'."
+                            ),
+                        }
+                    },
+                    "required": ["location"],
+                },
+            }
+        ],
+        "resources": [],
+        "prompts": [],
+    }
+
+
+# ---------------------------------------------------------------------------
 # Health check
 # ---------------------------------------------------------------------------
 
