@@ -177,7 +177,7 @@ def _coverage_note(data: dict) -> str | None:
 # Entry point
 # ---------------------------------------------------------------------------
 
-async def main():
+async def _main():
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream, write_stream,
@@ -185,5 +185,9 @@ async def main():
         )
 
 
+def main():
+    asyncio.run(_main())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,0 +1,20 @@
+{
+  "name": "io.github.aybeeare/water-conditions",
+  "description": "Real-time water temperature and tide predictions for 8,000+ lakes, rivers, beaches, and coastal locations. Sourced live from NOAA CO-OPS, USGS, and seatemperature.info. One tool, natural language in, structured data out.",
+  "repository": {
+    "url": "https://github.com/aybeeare/water-temp-fishing-guide",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registry": "pypi",
+      "name": "water-conditions-mcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "streamable-http",
+        "url": "https://water-temp-fishing-guide-production.up.railway.app/mcp"
+      }
+    }
+  ]
+}
