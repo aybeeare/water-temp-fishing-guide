@@ -356,6 +356,13 @@ def _do_cart_add(session_attrs):
     return response
 
 
+def _to_12h(time_str):
+    h, m = map(int, time_str.split(":"))
+    period = "AM" if h < 12 else "PM"
+    h12 = h % 12 or 12
+    return f"{h12}:{m:02d} {period}"
+
+
 def _format_tide_speech(tides):
     if not tides:
         return ""
@@ -363,8 +370,8 @@ def _format_tide_speech(tides):
     lows  = [t for t in tides if t.get("tide_type") == "L"]
 
     def describe(t):
-        time_part = t["tide_time"].split(" ")[-1] if " " in t["tide_time"] else t["tide_time"]
-        return f"{time_part} at {t['height_ft']} feet"
+        raw = t["tide_time"].split(" ")[-1] if " " in t["tide_time"] else t["tide_time"]
+        return f"{_to_12h(raw)} at {t['height_ft']} feet"
 
     parts = []
     if highs:
