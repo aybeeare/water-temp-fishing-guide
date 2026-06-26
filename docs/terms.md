@@ -32,4 +32,4 @@ These terms may be updated at any time. Continued use of the skill constitutes a
 
 ## Contact
 
-Questions can be directed to: abelkinrosen@lucentechnologies.com
+Questions can be directed to: rsvp4aaron@gmail.com

@@ -40,4 +40,4 @@ Any updates to this policy will be reflected on this page with a revised date.
 
 ## Contact
 
-Questions about this privacy policy can be directed to: abelkinrosen@lucentechnologies.com
+Questions about this privacy policy can be directed to: rsvp4aaron@gmail.com
