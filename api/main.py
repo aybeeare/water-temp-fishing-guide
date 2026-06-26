@@ -18,11 +18,13 @@ import os
 import re
 import sqlite3
 import logging
+import json
 from datetime import datetime, timezone, date
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
+from mcp.server.fastmcp import FastMCP
 
 from ingest.usgs_ingest import run_ingest
 from ingest.noaa_ingest import run_noaa_ingest_for, NOAA_STATIONS, upsert_tides
@@ -458,3 +460,77 @@ async def health():
         "db":        counts if db_ok else "error",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+
+# ---------------------------------------------------------------------------
+# MCP Server — SSE transport mounted at /mcp
+# Exposes get_water_conditions as a tool for any MCP-compliant agent.
+# ---------------------------------------------------------------------------
+
+_fastmcp = FastMCP("water-conditions")
+
+
+@_fastmcp.tool(
+    description=(
+        "Get real-time water temperature and tide predictions for any lake, river, "
+        "ocean, bay, or beach location. Data sourced live from NOAA CO-OPS, USGS, "
+        "and seatemperature.info — not from training data. "
+        "Coverage: 8,000+ locations across North America and major international bodies. "
+        "Use this whenever a user asks about current water temperature, beach or "
+        "swimming conditions, boating, surfing, fishing, tide times, or any question "
+        "requiring real-time water data."
+    )
+)
+async def get_water_conditions(location: str) -> str:
+    """
+    location: Water body name as natural language. Examples: 'Lake Michigan',
+    'Revere Beach', 'Chesapeake Bay', 'Galveston Island', 'Puget Sound',
+    'Potomac River', 'Waikiki Beach'.
+    """
+    import httpx
+    base = os.environ.get("FASTAPI_URL", "http://localhost:8000")
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.get(f"{base}/fishing-guide", params={"location": location})
+            if resp.status_code == 404:
+                return json.dumps({"error": f"Location not found: {location}. Try a more specific name."})
+            resp.raise_for_status()
+            data = resp.json()
+    except httpx.TimeoutException:
+        return json.dumps({"error": "Request timed out — data source temporarily slow, try again"})
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+    tides = data.get("tides") or []
+    tide_list = [
+        {
+            "type":      "high" if t["tide_type"] == "H" else "low",
+            "time":      t["tide_time"].split(" ")[-1] if " " in t["tide_time"] else t["tide_time"],
+            "height_ft": t["height_ft"],
+        }
+        for t in tides
+    ]
+
+    site_id = str(data.get("site_id", ""))
+    if site_id.isdigit() and len(site_id) == 7:
+        source = "noaa"
+    elif site_id.isdigit() and len(site_id) >= 8:
+        source = "usgs"
+    else:
+        source = "seatemperature.info"
+
+    result = {
+        "location":       data.get("site_name", location),
+        "temp_f":         data.get("temp_f"),
+        "temp_c":         data.get("temp_c"),
+        "temp_f_min":     data.get("temp_f_min"),
+        "temp_f_max":     data.get("temp_f_max"),
+        "source":         source,
+        "tides":          tide_list if tide_list else None,
+        "data_freshness": data.get("data_freshness"),
+    }
+    result = {k: v for k, v in result.items() if v is not None}
+    return json.dumps(result, indent=2)
+
+
+app.mount("/mcp", _fastmcp.sse_app())
