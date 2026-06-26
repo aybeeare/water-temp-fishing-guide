@@ -73,31 +73,6 @@ TOOLS = [
             "required": ["location"],
         },
     ),
-    types.Tool(
-        name="get_tide_predictions",
-        description=(
-            "Get today's high and low tide predictions for a coastal location. "
-            "Returns tide type (high/low), time, and height in feet. "
-            "Data sourced from NOAA CO-OPS tide prediction API for US coastal stations, "
-            "with seatemperature.info as fallback for international locations. "
-            "Use this tool when a user specifically asks about tide times, tide schedule, "
-            "or high/low tide for a beach or coastal location."
-        ),
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "location": {
-                    "type": "string",
-                    "description": (
-                        "Coastal location name. "
-                        "Examples: 'Sandy Hook NJ', 'Boston Harbor', 'Key West', "
-                        "'San Francisco Bay', 'Puget Sound', 'Cape Hatteras'."
-                    ),
-                }
-            },
-            "required": ["location"],
-        },
-    ),
 ]
 
 
@@ -114,8 +89,6 @@ async def list_tools() -> list[types.Tool]:
 async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
     if name == "get_water_conditions":
         return await _get_water_conditions(arguments)
-    if name == "get_tide_predictions":
-        return await _get_tide_predictions(arguments)
     raise ValueError(f"Unknown tool: {name}")
 
 
@@ -161,45 +134,6 @@ async def _get_water_conditions(arguments: dict) -> list[types.TextContent]:
 
 
 # ---------------------------------------------------------------------------
-# get_tide_predictions
-# ---------------------------------------------------------------------------
-
-async def _get_tide_predictions(arguments: dict) -> list[types.TextContent]:
-    location = arguments.get("location", "").strip()
-    if not location:
-        return [_error("location is required")]
-
-    data, err = await _fetch(f"{FASTAPI_URL}/fishing-guide", {"location": location})
-    if err:
-        return [_error(err)]
-
-    tides = data.get("tides") or []
-    if not tides:
-        return [_error(
-            f"No tide predictions available for {location}. "
-            "Tide data is only available for coastal locations with NOAA stations."
-        )]
-
-    tide_list = [
-        {
-            "type":      "high" if t["tide_type"] == "H" else "low",
-            "time":      t["tide_time"].split(" ")[-1] if " " in t["tide_time"] else t["tide_time"],
-            "height_ft": t["height_ft"],
-        }
-        for t in tides
-    ]
-
-    result = {
-        "location": data.get("site_name", location),
-        "date":     _today(),
-        "tides":    tide_list,
-        "note":     "Times are local to the station. Heights in feet above MLLW.",
-    }
-
-    return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-
-
-# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
@@ -237,11 +171,6 @@ def _coverage_note(data: dict) -> str | None:
     if data.get("temp_f_min") and data.get("temp_f_max"):
         return "Range reflects readings across the water body, not a single point."
     return None
-
-
-def _today() -> str:
-    from datetime import date
-    return date.today().isoformat()
 
 
 # ---------------------------------------------------------------------------
