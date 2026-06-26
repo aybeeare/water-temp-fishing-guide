@@ -19,6 +19,7 @@ import re
 import sqlite3
 import logging
 import json
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone, date
 from typing import Optional
 
@@ -38,7 +39,17 @@ from ingest.places_ingest import lookup_bait_shop, format_shop_speech
 
 log = logging.getLogger("uvicorn.error")
 
-app = FastAPI(title="Fishing Water Temp — Alexa+ AI Action API", version="1.2.0")
+# MCP server defined before FastAPI app so lifespan can reference it
+_fastmcp = FastMCP("water-conditions")
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    async with _fastmcp.session_manager.run():
+        yield
+
+
+app = FastAPI(title="Fishing Water Temp — Alexa+ AI Action API", version="1.2.0", lifespan=_lifespan)
 
 DB_PATH                = os.environ.get("DB_PATH", "fishing.db")
 ASSOCIATES_TRACKING_ID = os.environ.get("ASSOCIATES_TRACKING_ID", "yourstore-20")
@@ -463,12 +474,10 @@ async def health():
 
 
 # ---------------------------------------------------------------------------
-# MCP Server — SSE transport mounted at /mcp
+# MCP Server — streamable-HTTP transport at /mcp
 # Exposes get_water_conditions as a tool for any MCP-compliant agent.
+# Session manager started via FastAPI lifespan above.
 # ---------------------------------------------------------------------------
-
-_fastmcp = FastMCP("water-conditions")
-
 
 @_fastmcp.tool(
     description=(
@@ -533,4 +542,4 @@ async def get_water_conditions(location: str) -> str:
     return json.dumps(result, indent=2)
 
 
-app.mount("/mcp", _fastmcp.sse_app())
+app.mount("/", _fastmcp.streamable_http_app())
