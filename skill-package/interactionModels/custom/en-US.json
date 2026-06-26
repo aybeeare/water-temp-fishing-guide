@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "fishing water guide",
+      "invocationName": "water guide",
       "intents": [
         {
           "name": "GetFishingGuideIntent",
