@@ -86,6 +86,24 @@
         { "name": "AMAZON.YesIntent",  "samples": [] },
         { "name": "AMAZON.NoIntent",   "samples": [] },
         {
+          "name": "GetTideIntent",
+          "slots": [],
+          "samples": [
+            "what are the tides",
+            "what are the tide times",
+            "when is high tide",
+            "when is low tide",
+            "tell me about the tides",
+            "what about the tides",
+            "tide times",
+            "tides",
+            "tide schedule",
+            "tide information",
+            "when does the tide come in",
+            "when does the tide go out"
+          ]
+        },
+        {
           "name": "LocalShopIntent",
           "slots": [],
           "samples": [

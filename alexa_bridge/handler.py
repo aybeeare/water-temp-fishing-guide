@@ -55,8 +55,7 @@ def lambda_handler(event, context):
 def handle_intent(event):
     intent_name   = event["request"]["intent"]["name"]
     session_attrs = event.get("session", {}).get("attributes", {})
-    # DEBUG: uncomment to log intent + session state to CloudWatch
-    # print(f"INTENT={intent_name} SESSION={json.dumps(session_attrs)}")
+    print(f"INTENT={intent_name} SESSION={json.dumps(session_attrs)}")
 
     # ── GetFishingGuideIntent — fetch data, speak temp only ──────────────────
     if intent_name == "GetFishingGuideIntent":
@@ -161,6 +160,18 @@ def handle_intent(event):
             return speak("Try asking for water temperature at a location first.", end_session=False)
         return _offer_amazon_gear(session_attrs)
 
+    # ── GetTideIntent — follow-up tide question after temp response ──────────
+    if intent_name == "GetTideIntent":
+        tide_speech = session_attrs.get("pending_tides_speech")
+        if tide_speech:
+            return speak(tide_speech, end_session=False, session_attributes=session_attrs)
+        return speak(
+            "I don't have tide data for this location. "
+            "Tides are available for coastal NOAA stations like Revere Beach or Boston Harbor.",
+            end_session=False,
+            session_attributes=session_attrs,
+        )
+
     # ── Standard built-ins ────────────────────────────────────────────────────
     if intent_name == "AMAZON.HelpIntent":
         return speak(
@@ -258,6 +269,10 @@ def fetch_and_open(location):
             "I don't have species data for this exact station yet."
         )
 
+    # Tide speech
+    tides       = data.get("tides") or []
+    tide_speech = _format_tide_speech(tides)
+
     # Shop speech
     shop        = data.get("nearby_shop")
     shop_speech = _format_shop_speech(shop) if shop else ""
@@ -271,8 +286,10 @@ def fetch_and_open(location):
     associates_id  = directive["payload"]["associatedId"] if directive else None
     secondary_asin = secondary["payload"]["items"][0]["asin"] if secondary else None
 
+    full_temp_speech = temp_speech + (" " + tide_speech if tide_speech else "")
+
     return speak(
-        temp_speech + " Want to know what fish are active at this temperature?",
+        full_temp_speech + " Want to know what fish are active at this temperature?",
         end_session=False,
         session_attributes={
             "awaiting_fish_info":     True,
@@ -280,6 +297,7 @@ def fetch_and_open(location):
             "awaiting_shop_choice":   False,
             "awaiting_cart_confirm":  False,
             "pending_fish_speech":    fish_speech,
+            "pending_tides_speech":   tide_speech or "",
             "pending_shop_speech":    shop_speech,
             "pending_gear_name":      gear_name,
             "pending_asin":           asin,
@@ -338,6 +356,27 @@ def _do_cart_add(session_attrs):
     return response
 
 
+def _format_tide_speech(tides):
+    if not tides:
+        return ""
+    highs = [t for t in tides if t.get("tide_type") == "H"]
+    lows  = [t for t in tides if t.get("tide_type") == "L"]
+
+    def describe(t):
+        time_part = t["tide_time"].split(" ")[-1] if " " in t["tide_time"] else t["tide_time"]
+        return f"{time_part} at {t['height_ft']} feet"
+
+    parts = []
+    if highs:
+        parts.append("high tide at " + " and ".join(describe(t) for t in highs))
+    if lows:
+        parts.append("low tide at " + " and ".join(describe(t) for t in lows))
+    if not parts:
+        return ""
+    return "Today's tides: " + ", and ".join(parts) + \
+           ". Fish are most active in the two hours around each tide change."
+
+
 def _format_shop_speech(shop):
     if not shop:
         return ""
@@ -356,6 +395,12 @@ def _format_shop_speech(shop):
 # ---------------------------------------------------------------------------
 
 def add_to_cart(asin, associates_id):
+    payload = {
+        "type":  "BuyShoppingProducts",
+        "items": [{"asin": asin, "quantity": 1}],
+    }
+    if associates_id:
+        payload["associatedId"] = associates_id
     return {
         "version": "1.0",
         "response": {
@@ -365,14 +410,10 @@ def add_to_cart(asin, associates_id):
             },
             "directives": [
                 {
-                    "type": "Connections.SendRequest",
-                    "name": "AddToShoppingCart",
-                    "payload": {
-                        "type":         "BuyShoppingProducts",
-                        "items":        [{"asin": asin, "quantity": 1}],
-                        "associatedId": associates_id,
-                    },
-                    "token": "fishing-guide-cart-token",
+                    "type":    "Connections.SendRequest",
+                    "name":    "AddToShoppingCart",
+                    "payload": payload,
+                    "token":   "fishing-guide-cart-token",
                 }
             ],
             "shouldEndSession": None,
@@ -381,7 +422,9 @@ def add_to_cart(asin, associates_id):
 
 
 def handle_cart_response(event):
-    status = event["request"].get("status", {})
+    status  = event["request"].get("status", {})
+    payload = event["request"].get("payload", {})
+    print(f"CART_RESPONSE status={status} payload={json.dumps(payload)}")
     if status.get("code") == "200":
         return speak("Done! I've added it to your cart. Good luck out there!", end_session=True)
     return speak(
