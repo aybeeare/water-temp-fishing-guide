@@ -40,7 +40,7 @@ from ingest.places_ingest import lookup_bait_shop, format_shop_speech
 log = logging.getLogger("uvicorn.error")
 
 # MCP server defined before FastAPI app so lifespan can reference it
-_fastmcp = FastMCP("water-conditions")
+_fastmcp = FastMCP("water-conditions", host="0.0.0.0")
 
 
 @asynccontextmanager
