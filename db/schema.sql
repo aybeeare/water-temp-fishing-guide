@@ -115,3 +115,20 @@ CREATE TABLE IF NOT EXISTS api_call_log (
     call_count  INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (api_name, call_date)
 );
+
+-- ── tool_call_log ─────────────────────────────────────────────────────────────
+-- One row per MCP tool invocation — logged by get_water_conditions.
+-- success: 1 = returned data, 0 = error response
+CREATE TABLE IF NOT EXISTS tool_call_log (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    called_at   TEXT    NOT NULL,   -- ISO-8601 UTC
+    location    TEXT    NOT NULL,   -- raw user input
+    resolved_to TEXT,               -- site_name returned by /fishing-guide
+    temp_f      REAL,
+    source      TEXT,               -- noaa / usgs / seatemperature.info
+    success     INTEGER NOT NULL DEFAULT 1,
+    error       TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_tool_call_log_at
+    ON tool_call_log (called_at DESC);

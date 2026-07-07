@@ -23,7 +23,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone, date
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel
 from mcp.server.fastmcp import FastMCP
 
@@ -54,6 +54,7 @@ app = FastAPI(title="Fishing Water Temp — Alexa+ AI Action API", version="1.2.
 DB_PATH                = os.environ.get("DB_PATH", "fishing.db")
 ASSOCIATES_TRACKING_ID = os.environ.get("ASSOCIATES_TRACKING_ID", "yourstore-20")
 ENABLE_BAIT_SHOP       = os.environ.get("ENABLE_BAIT_SHOP", "true").lower() == "true"
+ACTIVITY_API_KEY       = os.environ.get("ACTIVITY_API_KEY", "")
 
 # Build a quick lookup: noaa station_id → display_name
 NOAA_STATION_NAMES = {sid: name for sid, name in NOAA_STATIONS}
@@ -517,6 +518,72 @@ async def health():
 
 
 # ---------------------------------------------------------------------------
+# Activity summary — owner-only endpoint, key-guarded
+# ---------------------------------------------------------------------------
+
+@app.get("/activity", include_in_schema=False)
+async def activity(x_activity_key: Optional[str] = Header(None)):
+    if not ACTIVITY_API_KEY or x_activity_key != ACTIVITY_API_KEY:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    conn  = get_db()
+    rows  = conn.execute(
+        """SELECT called_at, location, resolved_to, temp_f, source, success, error
+           FROM tool_call_log ORDER BY called_at DESC LIMIT 500"""
+    ).fetchall()
+    conn.close()
+
+    total    = len(rows)
+    success  = sum(1 for r in rows if r["success"])
+    loc_hits: dict[str, int] = {}
+    for r in rows:
+        key = r["resolved_to"] or r["location"]
+        loc_hits[key] = loc_hits.get(key, 0) + 1
+
+    return {
+        "total_calls":       total,
+        "unique_locations":  len(loc_hits),
+        "success_rate":      f"{success}/{total}",
+        "top_locations":     sorted(loc_hits.items(), key=lambda x: -x[1])[:15],
+        "recent":            [dict(r) for r in rows[:50]],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Activity log — append-only record of every MCP tool invocation
+# ---------------------------------------------------------------------------
+
+def _log_tool_call(
+    location: str,
+    resolved_to: Optional[str],
+    temp_f: Optional[float],
+    source: Optional[str],
+    success: bool,
+    error: Optional[str] = None,
+) -> None:
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute(
+            """INSERT INTO tool_call_log
+               (called_at, location, resolved_to, temp_f, source, success, error)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (
+                datetime.now(timezone.utc).isoformat(),
+                location,
+                resolved_to,
+                temp_f,
+                source,
+                1 if success else 0,
+                error,
+            ),
+        )
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # MCP Server — streamable-HTTP transport at /mcp
 # Exposes get_water_conditions as a tool for any MCP-compliant agent.
 # Session manager started via FastAPI lifespan above.
@@ -545,12 +612,15 @@ async def get_water_conditions(location: str) -> str:
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.get(f"{base}/fishing-guide", params={"location": location})
             if resp.status_code == 404:
+                _log_tool_call(location, None, None, None, success=False, error="location not found")
                 return json.dumps({"error": f"Location not found: {location}. Try a more specific name."})
             resp.raise_for_status()
             data = resp.json()
     except httpx.TimeoutException:
+        _log_tool_call(location, None, None, None, success=False, error="timeout")
         return json.dumps({"error": "Request timed out — data source temporarily slow, try again"})
     except Exception as e:
+        _log_tool_call(location, None, None, None, success=False, error=str(e))
         return json.dumps({"error": str(e)})
 
     tides = data.get("tides") or []
@@ -582,6 +652,7 @@ async def get_water_conditions(location: str) -> str:
         "data_freshness": data.get("data_freshness"),
     }
     result = {k: v for k, v in result.items() if v is not None}
+    _log_tool_call(location, result.get("location"), result.get("temp_f"), source, success=True)
     return json.dumps(result, indent=2)
 
 
