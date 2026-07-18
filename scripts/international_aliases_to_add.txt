@@ -1,0 +1,104 @@
+# International locations confirmed on seatemperature.info + geocoded
+# Add these rows to ALIAS_SEED in db/init_db.py
+
+    ("red-sea",                       "red-sea",  "scrape"),  # Red Sea
+    ("arabian-sea",                   "arabian-sea",  "scrape"),  # Arabian Sea
+    ("indian-ocean",                  "indian-ocean",  "scrape"),  # Indian Ocean
+    ("south-china-sea",               "south-china-sea",  "scrape"),  # South China Sea
+    ("coral-sea",                     "coral-sea",  "scrape"),  # Coral Sea
+    ("tasman-sea",                    "tasman-sea",  "scrape"),  # Tasman Sea
+    ("persian-gulf",                  "persian-gulf",  "scrape"),  # Persian Gulf
+    ("aegean-sea",                    "aegean-sea",  "scrape"),  # Aegean Sea
+    ("ionian-sea",                    "ionian-sea",  "scrape"),  # Ionian Sea
+    ("tyrrhenian-sea",                "tyrrhenian-sea",  "scrape"),  # Tyrrhenian Sea
+    ("sea-of-japan",                  "sea-of-japan",  "scrape"),  # Sea of Japan
+    ("yellow-sea",                    "yellow-sea",  "scrape"),  # Yellow Sea
+    ("gulf-of-thailand",              "gulf-of-thailand",  "scrape"),  # Gulf of Thailand
+    ("bay-of-bengal",                 "bay-of-bengal",  "scrape"),  # Bay of Bengal
+    ("strait-of-gibraltar",           "strait-of-gibraltar",  "scrape"),  # Strait of Gibraltar
+    ("dead-sea",                      "dead-sea",  "scrape"),  # Dead Sea
+    ("sea-of-galilee",                "sea-of-galilee",  "scrape"),  # Sea of Galilee
+    ("caspian-sea",                   "caspian-sea",  "scrape"),  # Caspian Sea
+    ("lake-victoria",                 "lake-victoria",  "scrape"),  # Lake Victoria
+    ("lake-tanganyika",               "lake-tanganyika",  "scrape"),  # Lake Tanganyika
+    ("gulf-of-aden",                  "gulf-of-aden",  "scrape"),  # Gulf of Aden
+    ("andaman-sea",                   "andaman-sea",  "scrape"),  # Andaman Sea
+    ("java-sea",                      "java-sea",  "scrape"),  # Java Sea
+    ("bosphorus",                     "bosphorus",  "scrape"),  # Bosphorus
+    ("gulf-of-oman",                  "gulf-of-oman",  "scrape"),  # Gulf of Oman
+    ("mykonos",                       "mykonos",  "scrape"),  # Mykonos
+    ("santorini",                     "santorini",  "scrape"),  # Santorini
+    ("ibiza",                         "ibiza",  "scrape"),  # Ibiza
+    ("formentera",                    "formentera",  "scrape"),  # Formentera
+    ("costa-del-sol",                 "costa-del-sol",  "scrape"),  # Costa del Sol
+    ("algarve",                       "algarve",  "scrape"),  # Algarve
+    ("amalfi-coast",                  "amalfi-coast",  "scrape"),  # Amalfi Coast
+    ("capri",                         "capri",  "scrape"),  # Capri
+    ("cinque-terre",                  "cinque-terre",  "scrape"),  # Cinque Terre
+    ("nice",                          "nice",  "scrape"),  # Nice
+    ("cannes",                        "cannes",  "scrape"),  # Cannes
+    ("monaco",                        "monaco",  "scrape"),  # Monaco
+    ("dubrovnik",                     "dubrovnik",  "scrape"),  # Dubrovnik
+    ("hvar",                          "hvar",  "scrape"),  # Hvar
+    ("corfu",                         "corfu",  "scrape"),  # Corfu
+    ("crete",                         "crete",  "scrape"),  # Crete
+    ("zakynthos",                     "zakynthos",  "scrape"),  # Zakynthos
+    ("benidorm",                      "benidorm",  "scrape"),  # Benidorm
+    ("faro",                          "faro",  "scrape"),  # Faro
+    ("paros",                         "paros",  "scrape"),  # Paros
+    ("naxos",                         "naxos",  "scrape"),  # Naxos
+    ("lake-constance",                "lake-constance",  "scrape"),  # Lake Constance
+    ("isle-of-skye",                  "isle-of-skye",  "scrape"),  # Isle of Skye
+    ("costa-brava",                   "costa-brava",  "scrape"),  # Costa Brava
+    ("sardinia",                      "sardinia",  "scrape"),  # Sardinia
+    ("sicily",                        "sicily",  "scrape"),  # Sicily
+    ("dubai",                         "dubai",  "scrape"),  # Dubai
+    ("abu-dhabi",                     "abu-dhabi",  "scrape"),  # Abu Dhabi
+    ("eilat",                         "eilat",  "scrape"),  # Eilat
+    ("sharm-el-sheikh",               "sharm-el-sheikh",  "scrape"),  # Sharm El Sheikh
+    ("hurghada",                      "hurghada",  "scrape"),  # Hurghada
+    ("doha",                          "doha",  "scrape"),  # Doha
+    ("muscat",                        "muscat",  "scrape"),  # Muscat
+    ("dahab",                         "dahab",  "scrape"),  # Dahab
+    ("phuket",                        "phuket",  "scrape"),  # Phuket
+    ("koh-samui",                     "koh-samui",  "scrape"),  # Koh Samui
+    ("krabi",                         "krabi",  "scrape"),  # Krabi
+    ("boracay",                       "boracay",  "scrape"),  # Boracay
+    ("palawan",                       "palawan",  "scrape"),  # Palawan
+    ("langkawi",                      "langkawi",  "scrape"),  # Langkawi
+    ("penang",                        "penang",  "scrape"),  # Penang
+    ("sentosa",                       "sentosa",  "scrape"),  # Sentosa
+    ("ha-long-bay",                   "ha-long-bay",  "scrape"),  # Ha Long Bay
+    ("nha-trang",                     "nha-trang",  "scrape"),  # Nha Trang
+    ("da-nang",                       "da-nang",  "scrape"),  # Da Nang
+    ("goa",                           "goa",  "scrape"),  # Goa
+    ("maldives",                      "maldives",  "scrape"),  # Maldives
+    ("okinawa",                       "okinawa",  "scrape"),  # Okinawa
+    ("busan",                         "busan",  "scrape"),  # Busan
+    ("sanya",                         "sanya",  "scrape"),  # Sanya
+    ("mumbai",                        "mumbai",  "scrape"),  # Mumbai
+    ("chennai",                       "chennai",  "scrape"),  # Chennai
+    ("colombo",                       "colombo",  "scrape"),  # Colombo
+    ("phi-phi-islands",               "phi-phi-islands",  "scrape"),  # Phi Phi Islands
+    ("zanzibar",                      "zanzibar",  "scrape"),  # Zanzibar
+    ("mombasa",                       "mombasa",  "scrape"),  # Mombasa
+    ("cape-town",                     "cape-town",  "scrape"),  # Cape Town
+    ("durban",                        "durban",  "scrape"),  # Durban
+    ("seychelles",                    "seychelles",  "scrape"),  # Seychelles
+    ("mauritius",                     "mauritius",  "scrape"),  # Mauritius
+    ("agadir",                        "agadir",  "scrape"),  # Agadir
+    ("casablanca",                    "casablanca",  "scrape"),  # Casablanca
+    ("alexandria",                    "alexandria",  "scrape"),  # Alexandria
+    ("gold-coast",                    "gold-coast",  "scrape"),  # Gold Coast
+    ("bondi-beach",                   "bondi-beach",  "scrape"),  # Bondi Beach
+    ("perth",                         "perth",  "scrape"),  # Perth
+    ("fiji",                          "fiji",  "scrape"),  # Fiji
+    ("tahiti",                        "tahiti",  "scrape"),  # Tahiti
+    ("bora-bora",                     "bora-bora",  "scrape"),  # Bora Bora
+    ("auckland",                      "auckland",  "scrape"),  # Auckland
+    ("rio-de-janeiro",                "rio-de-janeiro",  "scrape"),  # Rio de Janeiro
+    ("ipanema",                       "ipanema",  "scrape"),  # Ipanema
+    ("buzios",                        "buzios",  "scrape"),  # Buzios
+    ("florianopolis",                 "florianopolis",  "scrape"),  # Florianopolis
+    ("punta-del-este",                "punta-del-este",  "scrape"),  # Punta del Este
+    ("lake-titicaca",                 "lake-titicaca",  "scrape"),  # Lake Titicaca

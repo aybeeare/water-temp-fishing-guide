@@ -1,0 +1,18 @@
+# Candidates with no seatemperature.info page (or geocode failure)
+
+Strait of Malacca
+French Riviera
+Split
+Marbella
+Sylt
+Elba
+Bali
+Gili Islands
+Andaman Islands
+Jeju Island
+Hainan
+Koh Lanta
+Whitsundays
+Lake Taupo
+Cartagena
+Galapagos
