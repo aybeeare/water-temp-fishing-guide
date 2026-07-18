@@ -288,6 +288,7 @@ async def resolve_scrape(slug: str) -> Optional[sqlite3.Row]:
 NOAA_MAX_DISTANCE_KM   = float(os.environ.get("NOAA_MAX_DISTANCE_KM", "80"))
 USGS_MAX_DISTANCE_KM   = float(os.environ.get("USGS_MAX_DISTANCE_KM", "50"))
 SCRAPE_MAX_DISTANCE_KM = float(os.environ.get("SCRAPE_MAX_DISTANCE_KM", "150"))
+USGS_NOAA_OVERRIDE_KM  = float(os.environ.get("USGS_NOAA_OVERRIDE_KM", "10"))
 
 
 async def resolve_coordinates(lat: float, lon: float) -> tuple[str, str, float, str]:
@@ -295,13 +296,21 @@ async def resolve_coordinates(lat: float, lon: float) -> tuple[str, str, float, 
     Given a raw (lat, lon), find the nearest real water-temperature station
     across all sources and pick a winner.
 
-    Queries USGS (live bBox) and NOAA (local station_index) in parallel-ish
-    fashion and picks whichever candidate is physically closer — never blends
-    a freshwater and saltwater reading. Each candidate is discarded outright
-    if it exceeds its own source's max-distance threshold, so a mediocre
+    Queries USGS (live bBox) and NOAA (local station_index) — never blends a
+    freshwater and saltwater reading. Each candidate is discarded outright if
+    it exceeds its own source's max-distance threshold, so a mediocre
     in-range USGS match can't beat a NOAA candidate that was excluded for
     being just outside the NOAA threshold (they're evaluated independently
     before comparison, not against a shared cutoff).
+
+    When both qualify, NOAA wins by default even if it's farther away — NOAA
+    CO-OPS only instruments major coastal/tidal stations, never small ponds,
+    so its mere presence is a signal this is a significant body of water.
+    USGS's live bBox search has no such filter and can surface a municipal
+    reservoir a few km away that would otherwise out-compete a real coastal
+    station tens of km out on raw distance alone. USGS only overrides NOAA
+    when it's within USGS_NOAA_OVERRIDE_KM — i.e. close enough that you're
+    essentially at that specific lake/pond/river, not just "in the region."
 
     If neither USGS nor NOAA has a qualifying candidate, falls back to the
     nearest known scrape_location_index entry (mainly international/remote
@@ -332,10 +341,11 @@ async def resolve_coordinates(lat: float, lon: float) -> tuple[str, str, float, 
         winner, source = noaa_candidate, "noaa"
     elif noaa_candidate is None:
         winner, source = usgs_candidate, "usgs"
-    elif noaa_candidate["distance_km"] <= usgs_candidate["distance_km"]:
-        winner, source = noaa_candidate, "noaa"
-    else:
+    elif (usgs_candidate["distance_km"] < noaa_candidate["distance_km"]
+          and usgs_candidate["distance_km"] <= USGS_NOAA_OVERRIDE_KM):
         winner, source = usgs_candidate, "usgs"
+    else:
+        winner, source = noaa_candidate, "noaa"
 
     resolved_id = winner["station_id"] if source == "noaa" else winner["site_id"]
     return resolved_id, source, winner["distance_km"], winner["site_name"]

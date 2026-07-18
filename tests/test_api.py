@@ -198,6 +198,40 @@ def test_coordinates_resolve_to_usgs(patch_db):
     assert body["distance_km"] == pytest.approx(1.5)
 
 
+async def test_coordinates_noaa_wins_tie_break_when_usgs_not_decisively_closer(patch_db):
+    """USGS is numerically closer (14km, e.g. a small pond) but NOAA (65km,
+    e.g. a real coastal station) still wins, since USGS isn't within the
+    override radius — regression test for the Fresh Pond / Marblehead case."""
+    import api.main as api_main
+    usgs_hit = {"site_id": "422302071083801", "site_name": "FRESH POND, CAMBRIDGE, MA",
+                "lat": 42.38, "lon": -71.15, "distance_km": 14.0}
+    noaa_hit = {"station_id": "8454000", "site_name": "Providence, RI",
+                "lat": 41.807, "lon": -71.401, "distance_km": 65.0}
+    with patch("api.main.find_nearest_usgs_site", return_value=usgs_hit), \
+         patch("api.main.find_nearest_noaa_station", return_value=noaa_hit):
+        resolved_id, source, distance_km, site_name = await api_main.resolve_coordinates(42.4251, -70.9828)
+
+    assert source == "noaa"
+    assert resolved_id == "8454000"
+    assert distance_km == pytest.approx(65.0)
+
+
+async def test_coordinates_usgs_wins_when_within_override_radius(patch_db):
+    """USGS wins over a farther NOAA candidate when it's within the small
+    override radius — i.e. you're essentially at that specific water body."""
+    import api.main as api_main
+    usgs_hit = {"site_id": "04085427", "site_name": "Lake Michigan at Milwaukee, WI",
+                "lat": 43.0, "lon": -87.9, "distance_km": 3.0}
+    noaa_hit = {"station_id": "8443970", "site_name": "Boston Harbor, MA",
+                "lat": 42.3548, "lon": -71.0512, "distance_km": 40.0}
+    with patch("api.main.find_nearest_usgs_site", return_value=usgs_hit), \
+         patch("api.main.find_nearest_noaa_station", return_value=noaa_hit):
+        resolved_id, source, distance_km, site_name = await api_main.resolve_coordinates(43.0, -87.9)
+
+    assert source == "usgs"
+    assert resolved_id == "04085427"
+
+
 def test_coordinates_no_station_within_threshold_returns_404(patch_db):
     with patch("api.main.find_nearest_usgs_site", return_value=None), \
          patch("api.main.find_nearest_noaa_station", return_value=None):
