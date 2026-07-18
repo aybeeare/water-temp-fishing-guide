@@ -79,6 +79,39 @@ CREATE TABLE IF NOT EXISTS tide_cache (
 CREATE INDEX IF NOT EXISTS idx_tide_cache_site
     ON tide_cache (site_id, tide_date);
 
+-- ── noaa_station_index ───────────────────────────────────────────────────────
+-- One-time/occasional bulk snapshot of NOAA CO-OPS stations with a water-temp
+-- sensor (mdapi/prod/webapi/stations.json?type=watertemp). Populated by
+-- ingest/noaa_station_index.py, NOT on the 15-20min TTL cycle used for
+-- readings — refreshed manually/rarely since station locations don't change.
+-- Used for local haversine nearest-neighbor lookup, since NOAA's own API has
+-- no server-side spatial (bbox/radius-by-coordinate) query.
+CREATE TABLE IF NOT EXISTS noaa_station_index (
+    station_id  TEXT    PRIMARY KEY,   -- NOAA 7-digit station id, matches water_cache.site_id once ingested
+    site_name   TEXT    NOT NULL,
+    lat         REAL    NOT NULL,
+    lon         REAL    NOT NULL,
+    state       TEXT,                  -- as returned by mdapi (may be blank for non-US)
+    fetched_at  TEXT    NOT NULL       -- ISO-8601 UTC, when this snapshot was pulled
+);
+
+-- ── scrape_location_index ────────────────────────────────────────────────────
+-- One-time geocoding backfill of every scrape-source slug already known in
+-- location_aliases. seatemperature.info pages expose no coordinates of their
+-- own (confirmed: no JSON-LD geo data, no map embed, no meta tags), so this
+-- is built by geocoding each slug's display name via ingest/geocode_ingest.py,
+-- not scraped. Used as the last-resort tier in coordinate resolution — nearest
+-- known scrape location, for coordinates with no nearby USGS/NOAA station
+-- (mainly international/remote points). Refreshed manually/rarely, same
+-- posture as noaa_station_index.
+CREATE TABLE IF NOT EXISTS scrape_location_index (
+    slug        TEXT    PRIMARY KEY,
+    site_name   TEXT    NOT NULL,
+    lat         REAL    NOT NULL,
+    lon         REAL    NOT NULL,
+    fetched_at  TEXT    NOT NULL
+);
+
 -- ── site_species ──────────────────────────────────────────────────────────────
 -- Maps a site_id (USGS station, NOAA station, or scrape slug) to its commonly
 -- targeted fish species. Used to select species-appropriate gear recommendations.

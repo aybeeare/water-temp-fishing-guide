@@ -9310,15 +9310,23 @@ def init():
         except Exception:
             pass  # column already exists
 
+    # fishing_logic has no natural unique key (id is autoincrement-only), so
+    # INSERT OR IGNORE never had anything to conflict against — every rerun
+    # of this script (which happens on every deploy) silently appended a
+    # fresh duplicate copy of the whole seed set. Clear and reseed instead,
+    # matching the delete-then-insert pattern already used for tide_cache.
+    # Nothing else has a foreign key into fishing_logic.id, so this is safe.
+    conn.execute("DELETE FROM fishing_logic")
+
     conn.executemany(
-        """INSERT OR IGNORE INTO fishing_logic
+        """INSERT INTO fishing_logic
            (temp_min_f, temp_max_f, fish_behavior, recommended_gear, asin, water_type)
            VALUES (?, ?, ?, ?, ?, ?)""",
         FISHING_LOGIC_SEED,
     )
 
     conn.executemany(
-        """INSERT OR IGNORE INTO fishing_logic
+        """INSERT INTO fishing_logic
            (temp_min_f, temp_max_f, fish_behavior, recommended_gear, asin, water_type, target_species)
            VALUES (?, ?, ?, ?, ?, ?, ?)""",
         SPECIES_LOGIC_SEED,

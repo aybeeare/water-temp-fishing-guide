@@ -181,8 +181,10 @@ def test_tools_list_exposes_get_water_conditions(mcp_client):
     assert "get_water_conditions" in tool_names
 
 
-def test_tools_list_schema_has_required_location(mcp_client):
-    """The tool's inputSchema must declare location as a required string parameter."""
+def test_tools_list_schema_has_location_and_coordinate_params(mcp_client):
+    """The tool's inputSchema must declare location as a string param, and
+    latitude/longitude as an alternative numeric input — none required
+    individually, since the tool accepts location OR lat+lon."""
     session_id = _do_initialize(mcp_client)
     resp = mcp_client.post(
         "/mcp",
@@ -193,7 +195,11 @@ def test_tools_list_schema_has_required_location(mcp_client):
     tool = next(t for t in events[0]["result"]["tools"] if t["name"] == "get_water_conditions")
     schema = tool["inputSchema"]
     assert schema["properties"]["location"]["type"] == "string"
-    assert "location" in schema["required"]
+    # latitude/longitude are Optional[float] -> FastMCP renders as anyOf[number, null]
+    lat_types = {t.get("type") for t in schema["properties"]["latitude"]["anyOf"]}
+    lon_types = {t.get("type") for t in schema["properties"]["longitude"]["anyOf"]}
+    assert "number" in lat_types
+    assert "number" in lon_types
 
 
 def test_tools_list_description_mentions_water_and_temperature(mcp_client):

@@ -66,11 +66,19 @@ TOOLS = [
                         "Water body name as natural language. "
                         "Examples: 'Lake Michigan', 'Revere Beach', 'Chesapeake Bay', "
                         "'Cape Cod', 'Galveston Island', 'Puget Sound', 'Florida Keys', "
-                        "'Potomac River', 'Waikiki Beach', 'Gulf of Mexico'."
+                        "'Potomac River', 'Waikiki Beach', 'Gulf of Mexico'. "
+                        "Provide this OR latitude+longitude."
                     ),
-                }
+                },
+                "latitude": {
+                    "type": "number",
+                    "description": "Latitude, for nearest-station lookup when no location name is available. Requires longitude.",
+                },
+                "longitude": {
+                    "type": "number",
+                    "description": "Longitude, for nearest-station lookup when no location name is available. Requires latitude.",
+                },
             },
-            "required": ["location"],
         },
     ),
 ]
@@ -97,11 +105,18 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
 # ---------------------------------------------------------------------------
 
 async def _get_water_conditions(arguments: dict) -> list[types.TextContent]:
-    location = arguments.get("location", "").strip()
-    if not location:
-        return [_error("location is required")]
+    location  = arguments.get("location", "").strip()
+    latitude  = arguments.get("latitude")
+    longitude = arguments.get("longitude")
+    has_coords = latitude is not None and longitude is not None
 
-    data, err = await _fetch(f"{FASTAPI_URL}/fishing-guide", {"location": location})
+    if not location and not has_coords:
+        return [_error("Provide location, or both latitude and longitude.")]
+
+    params  = {"location": location} if location else {"lat": latitude, "lon": longitude}
+    log_key = location or f"{latitude},{longitude}"
+
+    data, err = await _fetch(f"{FASTAPI_URL}/fishing-guide", params)
     if err:
         return [_error(err)]
 
@@ -116,7 +131,7 @@ async def _get_water_conditions(arguments: dict) -> list[types.TextContent]:
     ]
 
     result = {
-        "location":       data.get("site_name", location),
+        "location":       data.get("site_name", log_key),
         "temp_f":         data.get("temp_f"),
         "temp_c":         data.get("temp_c"),
         "temp_f_min":     data.get("temp_f_min"),
@@ -125,6 +140,7 @@ async def _get_water_conditions(arguments: dict) -> list[types.TextContent]:
         "tides":          tide_list,
         "data_freshness": data.get("data_freshness"),
         "coverage_note":  _coverage_note(data),
+        "distance_km":    data.get("distance_km"),
     }
 
     # Remove None values for clean output

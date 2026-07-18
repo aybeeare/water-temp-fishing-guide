@@ -119,7 +119,8 @@ def test_noaa_cache_hit_with_tides(patch_db):
 def test_scrape_cache_hit(patch_db):
     """lake-tahoe alias → scrape source → served from seeded water_cache."""
     with patch("api.main.is_cache_fresh", return_value=True), \
-         patch("api.main.scrape_and_cache"):
+         patch("api.main.scrape_and_cache"), \
+         patch("api.main.scrape_tides", return_value=[]):
         client = make_client(patch_db)
         resp = client.get("/fishing-guide", params={"location": "lake tahoe"})
 
@@ -156,6 +157,141 @@ def test_unknown_location_404(patch_db):
         client = make_client(patch_db)
         resp = client.get("/fishing-guide", params={"location": "zxqwerty fictional lake"})
     assert resp.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# /fishing-guide — coordinate-based resolution
+# ---------------------------------------------------------------------------
+
+def test_coordinates_resolve_to_noaa(patch_db):
+    """NOAA candidate closer than USGS candidate → resolves via NOAA, cache hit."""
+    noaa_hit = {"station_id": "8443970", "site_name": "Boston Harbor, MA", "lat": 42.3548, "lon": -71.0512, "distance_km": 2.1}
+    with patch("api.main.find_nearest_noaa_station", return_value=noaa_hit), \
+         patch("api.main.find_nearest_usgs_site", return_value=None), \
+         patch("api.main.run_noaa_ingest_for"):
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"lat": 42.36, "lon": -71.06})
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["site_id"] == "8443970"
+    assert body["temp_f"] == pytest.approx(62.5, abs=0.1)
+    assert body["resolved_via"] == "coordinates"
+    assert body["distance_km"] == pytest.approx(2.1)
+
+
+def test_coordinates_resolve_to_usgs(patch_db):
+    """USGS candidate closer than NOAA candidate → resolves via USGS, cache hit."""
+    usgs_hit = {"site_id": "04085427", "site_name": "Lake Michigan at Milwaukee, WI", "lat": 43.0, "lon": -87.9, "distance_km": 1.5}
+    noaa_hit = {"station_id": "8443970", "site_name": "Boston Harbor, MA", "lat": 42.3548, "lon": -71.0512, "distance_km": 40.0}
+    with patch("api.main.find_nearest_usgs_site", return_value=usgs_hit), \
+         patch("api.main.find_nearest_noaa_station", return_value=noaa_hit), \
+         patch("api.main.run_ingest"):
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"lat": 43.0, "lon": -87.9})
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["site_id"] == "04085427"
+    assert body["temp_f"] == pytest.approx(68.0, abs=0.1)
+    assert body["resolved_via"] == "coordinates"
+    assert body["distance_km"] == pytest.approx(1.5)
+
+
+def test_coordinates_no_station_within_threshold_returns_404(patch_db):
+    with patch("api.main.find_nearest_usgs_site", return_value=None), \
+         patch("api.main.find_nearest_noaa_station", return_value=None):
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"lat": 0.0, "lon": 0.0})
+
+    assert resp.status_code == 404
+
+
+def test_coordinates_missing_lon_returns_400(patch_db):
+    client = make_client(patch_db)
+    resp = client.get("/fishing-guide", params={"lat": 42.36})
+    assert resp.status_code == 400
+
+
+def test_location_takes_precedence_over_coordinates(patch_db):
+    """When both location and lat/lon are given, the existing alias path wins
+    and coordinate resolution is never invoked."""
+    with patch("api.main.run_ingest"), \
+         patch("api.main.resolve_coordinates") as mock_resolve_coords:
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"location": "lake michigan", "lat": 0.0, "lon": 0.0})
+
+    assert resp.status_code == 200
+    assert resp.json()["resolved_via"] == "alias"
+    mock_resolve_coords.assert_not_called()
+
+
+def test_coordinates_falls_back_to_scrape_tier(patch_db):
+    """Neither USGS nor NOAA qualifies → falls back to the nearest known
+    scrape_location_index entry (seeded 'lake-tahoe' at 39.0968, -120.0324)."""
+    with patch("api.main.find_nearest_usgs_site", return_value=None), \
+         patch("api.main.find_nearest_noaa_station", return_value=None), \
+         patch("api.main.scrape_tides", return_value=[]):
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"lat": 39.10, "lon": -120.03})
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["site_id"] == "lake-tahoe"
+    assert body["temp_f"] == pytest.approx(58.0, abs=0.1)
+    assert body["resolved_via"] == "coordinates"
+    assert body["tides"] is None
+
+
+# ---------------------------------------------------------------------------
+# /fishing-guide — geocoding fallback for failed string locations
+# ---------------------------------------------------------------------------
+
+def test_geocoded_fallback_after_alias_and_scrape_miss(patch_db):
+    """Alias miss + scrape-slug-guess miss → geocode the string → resolves
+    via the coordinate path (here, to the seeded NOAA cache hit)."""
+    with patch("api.main.is_cache_fresh", return_value=False), \
+         patch("api.main.scrape_and_cache", return_value=None), \
+         patch("api.main.geocode_location", return_value=(42.36, -71.06)), \
+         patch("api.main.resolve_coordinates", return_value=("8443970", "noaa", 2.1, "Boston Harbor, MA")), \
+         patch("api.main.run_noaa_ingest_for"):
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"location": "some obscure real place"})
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["temp_f"] == pytest.approx(62.5, abs=0.1)
+    assert body["resolved_via"] == "geocoded"
+    assert body["distance_km"] == pytest.approx(2.1)
+    assert "Some Obscure Real Place" in body["site_name"]
+
+
+def test_geocoded_fallback_returns_404_when_geocoding_fails(patch_db):
+    """Alias miss + scrape miss + geocoding also returns nothing → generic 404."""
+    with patch("api.main.is_cache_fresh", return_value=False), \
+         patch("api.main.scrape_and_cache", return_value=None), \
+         patch("api.main.geocode_location", return_value=None):
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"location": "zxqwerty fictional lake"})
+
+    assert resp.status_code == 404
+
+
+def test_geocoded_fallback_returns_404_when_resolve_coordinates_finds_nothing(patch_db):
+    """Geocoding succeeds but resolve_coordinates finds nothing within any
+    threshold (raises 404 internally) → falls through to the existing
+    generic 404 rather than propagating the coordinate-specific message."""
+    from fastapi import HTTPException
+
+    with patch("api.main.is_cache_fresh", return_value=False), \
+         patch("api.main.scrape_and_cache", return_value=None), \
+         patch("api.main.geocode_location", return_value=(0.0, 0.0)), \
+         patch("api.main.resolve_coordinates", side_effect=HTTPException(status_code=404, detail="no station nearby")):
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"location": "zxqwerty fictional lake"})
+
+    assert resp.status_code == 404
+    assert "No temperature data found" in resp.json()["detail"]
 
 
 # ---------------------------------------------------------------------------

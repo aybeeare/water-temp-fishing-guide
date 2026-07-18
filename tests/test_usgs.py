@@ -14,6 +14,11 @@ from ingest.usgs_ingest import (
     fetch_usgs,
     upsert_cache,
     USGS_IV_URL,
+    build_bbox,
+    parse_usgs_rdb,
+    fetch_usgs_sites_in_bbox,
+    find_nearest_usgs_site,
+    USGS_SITE_SERVICE_URL,
 )
 
 # ---------------------------------------------------------------------------
@@ -177,6 +182,76 @@ def test_upsert_cache_overwrites(db_path):
 
 
 # ---------------------------------------------------------------------------
+# Coordinate-based spatial search
+# ---------------------------------------------------------------------------
+
+def test_build_bbox_format():
+    bbox = build_bbox(38.65, -90.15, radius_deg=0.25)
+    assert bbox == "-90.4000,38.4000,-89.9000,38.9000"
+
+def test_build_bbox_west_south_east_north_order():
+    bbox = build_bbox(10.0, 20.0, radius_deg=1.0)
+    west, south, east, north = (float(x) for x in bbox.split(","))
+    assert west  == pytest.approx(19.0)
+    assert south == pytest.approx(9.0)
+    assert east  == pytest.approx(21.0)
+    assert north == pytest.approx(11.0)
+
+SAMPLE_USGS_RDB = (
+    "#\n"
+    "# US Geological Survey\n"
+    "agency_cd\tsite_no\tstation_nm\tsite_tp_cd\tdec_lat_va\tdec_long_va\n"
+    "5s\t15s\t50s\t7s\t16s\t16s\n"
+    "USGS\t07010000\tMississippi River at St. Louis, MO\tST\t38.629\t-90.1797778\n"
+    "USGS\t99999999\tSITE WITH NO COORDS\tST\t\t\n"
+)
+
+def test_parse_usgs_rdb_extracts_sites_with_coords():
+    sites = parse_usgs_rdb(SAMPLE_USGS_RDB)
+    assert len(sites) == 1
+    s = sites[0]
+    assert s["site_id"]   == "07010000"
+    assert s["site_name"] == "Mississippi River at St. Louis, MO"
+    assert s["lat"] == pytest.approx(38.629)
+    assert s["lon"] == pytest.approx(-90.1797778)
+
+def test_parse_usgs_rdb_empty_text():
+    assert parse_usgs_rdb("") == []
+
+def test_parse_usgs_rdb_only_comments():
+    assert parse_usgs_rdb("#\n# nothing here\n") == []
+
+def test_fetch_usgs_sites_in_bbox_success(httpx_mock: HTTPXMock):
+    httpx_mock.add_response(text=SAMPLE_USGS_RDB)
+    sites = fetch_usgs_sites_in_bbox(38.65, -90.15)
+    assert len(sites) == 1
+    assert sites[0]["site_id"] == "07010000"
+
+def test_fetch_usgs_sites_in_bbox_http_error(httpx_mock: HTTPXMock):
+    httpx_mock.add_response(status_code=503)
+    sites = fetch_usgs_sites_in_bbox(38.65, -90.15)
+    assert sites == []
+
+def test_find_nearest_usgs_site_verifies_live_data(httpx_mock: HTTPXMock):
+    httpx_mock.add_response(text=SAMPLE_USGS_RDB)         # bbox site search
+    httpx_mock.add_response(json=SAMPLE_USGS_RESPONSE)    # live IV verification, site_id matches
+    result = find_nearest_usgs_site(38.65, -90.15, max_km=50)
+    assert result is not None
+    assert result["site_id"] == "07010000"
+    assert "distance_km" in result
+
+def test_find_nearest_usgs_site_beyond_threshold(httpx_mock: HTTPXMock):
+    httpx_mock.add_response(text=SAMPLE_USGS_RDB)  # site is ~3km away, threshold excludes it
+    result = find_nearest_usgs_site(38.65, -90.15, max_km=0.01)
+    assert result is None
+
+def test_find_nearest_usgs_site_no_candidates(httpx_mock: HTTPXMock):
+    httpx_mock.add_response(text="#\n# no data\n")
+    result = find_nearest_usgs_site(0.0, 0.0)
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
 # Live API integration
 # ---------------------------------------------------------------------------
 
@@ -218,3 +293,13 @@ def test_usgs_live_parse_gives_temperature(monkeypatch):
     assert r["site_id"] == LIVE_SITE_ID
     assert r["temp_f"] is not None, "Sensor may be offline; try a different LIVE_SITE_ID"
     assert 32 <= r["temp_f"] <= 100, f"Temperature {r['temp_f']}°F outside plausible range"
+
+
+@pytest.mark.integration
+def test_find_nearest_usgs_site_live():
+    """Live bbox + verification search near the Potomac at DC finds a real site."""
+    result = find_nearest_usgs_site(38.8048, -77.0378, max_km=50)
+    assert result is not None
+    assert "site_id" in result
+    assert "distance_km" in result
+    assert result["distance_km"] <= 50

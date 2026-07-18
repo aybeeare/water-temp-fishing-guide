@@ -45,6 +45,19 @@ def seeded_db(db_path):
             ("lake-tahoe","Lake Tahoe",                    58.0, 14.4, "2099-01-01T00:00:00+00:00", None),
         ],
     )
+    conn.executemany(
+        "INSERT INTO noaa_station_index (station_id, site_name, lat, lon, state, fetched_at) VALUES (?,?,?,?,?,?)",
+        [
+            ("8443970", "Boston Harbor, MA", 42.3548, -71.0512, "MA", "2099-01-01T00:00:00+00:00"),
+            ("9410170", "San Diego, CA",     32.7142, -117.1736, "CA", "2099-01-01T00:00:00+00:00"),
+        ],
+    )
+    conn.executemany(
+        "INSERT INTO scrape_location_index (slug, site_name, lat, lon, fetched_at) VALUES (?,?,?,?,?)",
+        [
+            ("lake-tahoe", "Lake Tahoe", 39.0968, -120.0324, "2099-01-01T00:00:00+00:00"),
+        ],
+    )
     conn.commit()
     conn.close()
     return db_path
@@ -53,13 +66,21 @@ def seeded_db(db_path):
 @pytest.fixture
 def patch_db(seeded_db, monkeypatch):
     """Monkeypatch DB_PATH in all modules that read it."""
-    import ingest.usgs_ingest    as usgs
-    import ingest.noaa_ingest    as noaa
-    import ingest.sea_temp_scraper as scraper
-    import api.main              as api_main
+    import ingest.usgs_ingest          as usgs
+    import ingest.noaa_ingest          as noaa
+    import ingest.noaa_station_index   as noaa_index
+    import ingest.scrape_location_index as scrape_index
+    import ingest.geocode_ingest       as geocode
+    import ingest.sea_temp_scraper     as scraper
+    import ingest.places_ingest        as places
+    import api.main                    as api_main
 
-    monkeypatch.setattr(usgs,    "DB_PATH", seeded_db)
-    monkeypatch.setattr(noaa,    "DB_PATH", seeded_db)
-    monkeypatch.setattr(scraper, "DB_PATH", seeded_db)
-    monkeypatch.setattr(api_main,"DB_PATH", seeded_db)
+    monkeypatch.setattr(usgs,        "DB_PATH", seeded_db)
+    monkeypatch.setattr(noaa,        "DB_PATH", seeded_db)
+    monkeypatch.setattr(noaa_index,  "DB_PATH", seeded_db)
+    monkeypatch.setattr(scrape_index,"DB_PATH", seeded_db)
+    monkeypatch.setattr(geocode,     "DB_PATH", seeded_db)
+    monkeypatch.setattr(scraper,     "DB_PATH", seeded_db)
+    monkeypatch.setattr(places,      "DB_PATH", seeded_db)
+    monkeypatch.setattr(api_main,    "DB_PATH", seeded_db)
     return seeded_db

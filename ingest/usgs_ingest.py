@@ -22,6 +22,8 @@ from typing import Optional
 
 import httpx
 
+from ingest.geo import haversine_km
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
@@ -31,7 +33,8 @@ log = logging.getLogger(__name__)
 DB_PATH     = os.environ.get("DB_PATH", "fishing.db")
 USGS_API_KEY = os.environ.get("USGS_API_KEY", "DEMO_KEY")  # replace before prod
 
-USGS_IV_URL = "https://waterservices.usgs.gov/nwis/iv/"
+USGS_IV_URL          = "https://waterservices.usgs.gov/nwis/iv/"
+USGS_SITE_SERVICE_URL = "https://waterservices.usgs.gov/nwis/site/"
 
 # Add / remove site IDs here.  Find IDs at https://waterdata.usgs.gov/nwis
 TARGET_SITES: list[str] = [
@@ -159,6 +162,135 @@ def upsert_cache(conn: sqlite3.Connection, records: list[dict]) -> None:
         [{**r, "fetched_at": now_utc} for r in records],
     )
     conn.commit()
+
+
+# ---------------------------------------------------------------------------
+# Coordinate-based spatial search
+#
+# Unlike the fixed-site TARGET_SITES ingest above, this queries the USGS
+# Site Service live, per-request — USGS is dense enough nationwide that a
+# bBox query around any coordinate reliably finds something, so there's no
+# need to mirror a station list locally (contrast with NOAA, which does need
+# a local mirror — see ingest/noaa_station_index.py).
+# ---------------------------------------------------------------------------
+
+def build_bbox(lat: float, lon: float, radius_deg: float = 0.25) -> str:
+    """'west,south,east,north' string for the USGS bBox param, decimal degrees.
+    USGS caps lat_range * lon_range at 25 deg^2 — a 2*radius_deg square box
+    stays far under that limit for any sane radius_deg."""
+    west  = lon - radius_deg
+    east  = lon + radius_deg
+    south = lat - radius_deg
+    north = lat + radius_deg
+    return f"{west:.4f},{south:.4f},{east:.4f},{north:.4f}"
+
+
+def parse_usgs_rdb(text: str) -> list[dict]:
+    """Parse USGS Site Service RDB (tab-delimited) output.
+
+    Format: comment lines starting with '#', then a header row, then a
+    format-width row (e.g. '5s\\t15s\\t...', discarded), then data rows.
+    Returns [{site_id, site_name, lat, lon}, ...] — rows with missing
+    coordinates are skipped.
+    """
+    lines = [ln for ln in text.splitlines() if ln and not ln.startswith("#")]
+    if len(lines) < 2:
+        return []
+
+    headers = lines[0].split("\t")
+    data_lines = lines[2:]  # lines[1] is the format-width row
+
+    try:
+        idx_site_no    = headers.index("site_no")
+        idx_station_nm = headers.index("station_nm")
+        idx_lat        = headers.index("dec_lat_va")
+        idx_lon        = headers.index("dec_long_va")
+    except ValueError:
+        log.error("Unexpected USGS RDB header format: %s", headers)
+        return []
+
+    sites = []
+    for line in data_lines:
+        fields = line.split("\t")
+        if len(fields) <= max(idx_site_no, idx_station_nm, idx_lat, idx_lon):
+            continue
+        lat_raw = fields[idx_lat].strip()
+        lon_raw = fields[idx_lon].strip()
+        if not lat_raw or not lon_raw:
+            continue
+        try:
+            sites.append({
+                "site_id":   fields[idx_site_no].strip(),
+                "site_name": fields[idx_station_nm].strip(),
+                "lat":       float(lat_raw),
+                "lon":       float(lon_raw),
+            })
+        except ValueError:
+            continue
+    return sites
+
+
+# Surface-water site types only — excludes groundwater wells/springs, which
+# also carry parameterCd=00010 (temperature) but aren't a body of water.
+# ST=stream, ST-CA=canal, LK=lake/reservoir/pond, ES=estuary, OC=ocean,
+# OC-CO=coastal ocean.
+USGS_SURFACE_WATER_SITE_TYPES = "ST,ST-CA,LK,ES,OC,OC-CO"
+
+
+def fetch_usgs_sites_in_bbox(lat: float, lon: float, radius_deg: float = 0.25) -> list[dict]:
+    """Live metadata lookup (not the hot-path reading fetch, so no retry loop —
+    matches this module's existing single-attempt pattern for fetch_usgs)."""
+    params = {
+        "format":         "rdb",
+        "bBox":           build_bbox(lat, lon, radius_deg),
+        "parameterCd":    "00010",
+        "siteOutput":     "expanded",
+        "siteType":       USGS_SURFACE_WATER_SITE_TYPES,
+        # Site Service's parameterCd filter only means "has ever collected this
+        # parameter" — many matches are historical/discontinued. hasDataTypeCd=iv
+        # narrows to sites currently reporting live instantaneous values, which
+        # is what resolve_usgs()/the IV endpoint actually needs.
+        "hasDataTypeCd":  "iv",
+    }
+    headers = {"X-Api-Key": USGS_API_KEY}
+    try:
+        resp = httpx.get(USGS_SITE_SERVICE_URL, params=params, headers=headers, timeout=25)
+        resp.raise_for_status()
+        return parse_usgs_rdb(resp.text)
+    except httpx.HTTPError as exc:
+        log.error("USGS site service HTTP error: %s", exc)
+        return []
+
+
+def find_nearest_usgs_site(lat: float, lon: float, radius_deg: float = 0.25,
+                            max_km: float = 50.0, max_candidates_to_verify: int = 5) -> Optional[dict]:
+    """Rank bBox candidates by real haversine distance (the bBox result is an
+    unsorted rectangle, not a nearest-first list), then verify against the
+    live IV endpoint nearest-first.
+
+    hasDataTypeCd=iv (used in fetch_usgs_sites_in_bbox) is a site-level flag —
+    it doesn't guarantee THIS parameter (00010) currently has live values at
+    that site, only that the site has *some* live instantaneous data. So the
+    nearest bbox match can still turn out to have no current reading; walk
+    outward to the next-nearest candidate rather than failing outright.
+    """
+    candidates = fetch_usgs_sites_in_bbox(lat, lon, radius_deg)
+    if not candidates:
+        return None
+
+    ranked = sorted(
+        ({**c, "distance_km": round(haversine_km(lat, lon, c["lat"], c["lon"]), 2)}
+         for c in candidates),
+        key=lambda c: c["distance_km"],
+    )
+    ranked = [c for c in ranked if c["distance_km"] <= max_km]
+
+    for candidate in ranked[:max_candidates_to_verify]:
+        live = fetch_usgs([candidate["site_id"]])
+        if live and parse_usgs_response(live):
+            return candidate
+
+    return None
 
 
 # ---------------------------------------------------------------------------

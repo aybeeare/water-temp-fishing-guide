@@ -27,8 +27,11 @@ from fastapi import FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel
 from mcp.server.fastmcp import FastMCP
 
-from ingest.usgs_ingest import run_ingest
+from ingest.usgs_ingest import run_ingest, find_nearest_usgs_site
 from ingest.noaa_ingest import run_noaa_ingest_for, NOAA_STATIONS, upsert_tides
+from ingest.noaa_station_index import find_nearest_noaa_station
+from ingest.scrape_location_index import find_nearest_scrape_location
+from ingest.geocode_ingest import geocode_location
 from ingest.sea_temp_scraper import (
     scrape_and_cache,
     scrape_tides,
@@ -99,6 +102,8 @@ class FishingGuideResponse(BaseModel):
     secondary_gear:        Optional[str]                  = None
     disambiguation:        Optional[list[DisambiguationOption]] = None
     species:               Optional[list[str]]            = None
+    distance_km:           Optional[float]                = None  # populated only when resolved via lat/lon
+    resolved_via:          Optional[str]                  = None  # "coordinates" | "alias" | "site_id" | "geocoded"
 
 
 # ---------------------------------------------------------------------------
@@ -280,23 +285,85 @@ async def resolve_scrape(slug: str) -> Optional[sqlite3.Row]:
     return row
 
 
+NOAA_MAX_DISTANCE_KM   = float(os.environ.get("NOAA_MAX_DISTANCE_KM", "80"))
+USGS_MAX_DISTANCE_KM   = float(os.environ.get("USGS_MAX_DISTANCE_KM", "50"))
+SCRAPE_MAX_DISTANCE_KM = float(os.environ.get("SCRAPE_MAX_DISTANCE_KM", "150"))
+
+
+async def resolve_coordinates(lat: float, lon: float) -> tuple[str, str, float, str]:
+    """
+    Given a raw (lat, lon), find the nearest real water-temperature station
+    across all sources and pick a winner.
+
+    Queries USGS (live bBox) and NOAA (local station_index) in parallel-ish
+    fashion and picks whichever candidate is physically closer — never blends
+    a freshwater and saltwater reading. Each candidate is discarded outright
+    if it exceeds its own source's max-distance threshold, so a mediocre
+    in-range USGS match can't beat a NOAA candidate that was excluded for
+    being just outside the NOAA threshold (they're evaluated independently
+    before comparison, not against a shared cutoff).
+
+    If neither USGS nor NOAA has a qualifying candidate, falls back to the
+    nearest known scrape_location_index entry (mainly international/remote
+    coverage with no government sensor nearby) before giving up.
+
+    Returns (resolved_id, source, distance_km, site_name).
+    Raises HTTPException(404) if nothing qualifies from any source.
+    """
+    conn = get_db()
+    noaa_candidate = find_nearest_noaa_station(conn, lat, lon, max_km=NOAA_MAX_DISTANCE_KM)
+    conn.close()
+
+    usgs_candidate = find_nearest_usgs_site(lat, lon, max_km=USGS_MAX_DISTANCE_KM)
+
+    if usgs_candidate is None and noaa_candidate is None:
+        conn = get_db()
+        scrape_candidate = find_nearest_scrape_location(conn, lat, lon, max_km=SCRAPE_MAX_DISTANCE_KM)
+        conn.close()
+        if scrape_candidate is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No water-temperature station found near ({lat}, {lon}).",
+            )
+        return (scrape_candidate["slug"], "scrape",
+                scrape_candidate["distance_km"], scrape_candidate["site_name"])
+
+    if usgs_candidate is None:
+        winner, source = noaa_candidate, "noaa"
+    elif noaa_candidate is None:
+        winner, source = usgs_candidate, "usgs"
+    elif noaa_candidate["distance_km"] <= usgs_candidate["distance_km"]:
+        winner, source = noaa_candidate, "noaa"
+    else:
+        winner, source = usgs_candidate, "usgs"
+
+    resolved_id = winner["station_id"] if source == "noaa" else winner["site_id"]
+    return resolved_id, source, winner["distance_km"], winner["site_name"]
+
+
 # ---------------------------------------------------------------------------
 # Main endpoint
 # ---------------------------------------------------------------------------
 
 @app.get("/fishing-guide", response_model=FishingGuideResponse)
 async def fishing_guide(
-    site_id:  Optional[str] = Query(None, description="Station ID (USGS or NOAA)"),
-    location: Optional[str] = Query(None, description="Spoken location name"),
+    site_id:  Optional[str]   = Query(None, description="Station ID (USGS or NOAA)"),
+    location: Optional[str]   = Query(None, description="Spoken location name"),
+    lat:      Optional[float] = Query(None, description="Latitude for nearest-station lookup"),
+    lon:      Optional[float] = Query(None, description="Longitude for nearest-station lookup"),
 ):
-    if not site_id and not location:
-        raise HTTPException(status_code=400, detail="Provide either site_id or location.")
+    if not site_id and not location and (lat is None or lon is None):
+        raise HTTPException(status_code=400, detail="Provide site_id, location, or both lat and lon.")
 
     resolved_id: str
     source: str
+    coord_site_name: Optional[str] = None
+    distance_km:     Optional[float] = None
+    resolved_via     = "site_id"
 
-    # ── Resolve location → station ID ────────────────────────────────────────
+    # ── Resolve location / coordinates → station ID ──────────────────────────
     if location and not site_id:
+        resolved_via = "alias"
         alias = normalize_location(location)
         conn  = get_db()
         row   = lookup_alias(conn, alias)
@@ -316,6 +383,9 @@ async def fishing_guide(
                 disambig = get_disambiguation_options(resolved_id)
                 if disambig:
                     return _disambiguation_response(resolved_id, location, disambig)
+    elif lat is not None and lon is not None and not site_id:
+        resolved_via = "coordinates"
+        resolved_id, source, distance_km, coord_site_name = await resolve_coordinates(lat, lon)
     else:
         resolved_id = site_id
         # Detect source from station ID format: NOAA IDs are 7 digits, USGS are 8+
@@ -330,26 +400,60 @@ async def fishing_guide(
         water = await resolve_scrape(resolved_id)
 
     if water is None:
+        if resolved_via == "coordinates":
+            # No slug to scrape for a raw coordinate — the nearest station
+            # exists but currently has no cached/live reading. Fail cleanly
+            # rather than guessing a scrape slug from a station ID.
+            raise HTTPException(
+                status_code=404,
+                detail=f"Found a nearby station ({resolved_id}, {distance_km} km away) "
+                       "but it has no current temperature data.",
+            )
         # Primary source offline or no data — try seatemperature.info as fallback.
         # Skip if we already tried the scraper (source == "scrape") with the same slug
         # to avoid a redundant double-request on unknown locations.
         scrape_slug = normalize_location(location) if location else normalize_location(resolved_id)
         if source != "scrape" or scrape_slug != resolved_id:
             water = await resolve_scrape(scrape_slug)
+
+        if water is None and location:
+            # Both the alias table and the raw-slug scrape guess have failed —
+            # try geocoding the raw string and running it through the same
+            # coordinate resolution used for lat/lon input (USGS -> NOAA ->
+            # nearest known scrape location).
+            coords = geocode_location(location)
+            if coords:
+                try:
+                    resolved_id, source, distance_km, coord_site_name = await resolve_coordinates(*coords)
+                    resolved_via = "geocoded"
+                    if source == "usgs":
+                        water = await resolve_usgs(resolved_id)
+                    elif source == "noaa":
+                        water = await resolve_noaa(resolved_id)
+                    else:
+                        water = await resolve_scrape(resolved_id)
+                except HTTPException:
+                    # resolve_coordinates found nothing within any threshold —
+                    # fall through to the generic 404 below.
+                    water = None
+
         if water is None:
             raise HTTPException(
                 status_code=404,
                 detail=f"No temperature data found for '{resolved_id}'. "
                        "Try a nearby location or check the spelling.",
             )
-        source      = "scrape"
-        resolved_id = scrape_slug
+        if resolved_via != "geocoded":
+            source      = "scrape"
+            resolved_id = scrape_slug
 
     temp_f    = water["temp_f"]
     temp_c    = water["temp_c"]
     # Use the user's spoken location name when provided rather than the
-    # underlying station name (e.g. "Revere Beach" not "Boston Harbor, MA")
-    site_name = location.title() if location else water["site_name"]
+    # underlying station name (e.g. "Revere Beach" not "Boston Harbor, MA");
+    # for coordinate lookups there's no user-typed name, so use the winning
+    # station's real name instead.
+    site_name = location.title() if location else (coord_site_name or water["site_name"])
     fetched   = water["fetched_at"]
 
     if temp_f is None:
@@ -369,6 +473,8 @@ async def fishing_guide(
                 data_freshness  = fetched,
                 spoken_response = f"The sensor at {site_name} is currently offline. No temperature data is available.",
                 sponsor_script  = "",
+                distance_km     = distance_km,
+                resolved_via    = resolved_via,
             )
 
     # ── Tides, species, fishing logic ────────────────────────────────────────
@@ -421,6 +527,8 @@ async def fishing_guide(
         secondary_directive = secondary_directive,
         secondary_gear      = logic["secondary_gear"] if logic else None,
         species             = species_list if species_list else None,
+        distance_km         = distance_km,
+        resolved_via        = resolved_via,
     )
 
 
@@ -470,11 +578,19 @@ async def mcp_server_card():
                             "type": "string",
                             "description": (
                                 "Water body name as natural language. Examples: 'Lake Michigan', "
-                                "'Revere Beach', 'Chesapeake Bay', 'Galveston Island', 'Puget Sound'."
+                                "'Revere Beach', 'Chesapeake Bay', 'Galveston Island', 'Puget Sound'. "
+                                "Provide this OR latitude+longitude."
                             ),
-                        }
+                        },
+                        "latitude": {
+                            "type": "number",
+                            "description": "Latitude, for nearest-station lookup when no location name is available. Requires longitude.",
+                        },
+                        "longitude": {
+                            "type": "number",
+                            "description": "Longitude, for nearest-station lookup when no location name is available. Requires latitude.",
+                        },
                     },
-                    "required": ["location"],
                 },
             }
         ],
@@ -600,27 +716,38 @@ def _log_tool_call(
         "requiring real-time water data."
     )
 )
-async def get_water_conditions(location: str) -> str:
+async def get_water_conditions(location: str = "", latitude: Optional[float] = None,
+                                longitude: Optional[float] = None) -> str:
     """
     location: Water body name as natural language. Examples: 'Lake Michigan',
     'Revere Beach', 'Chesapeake Bay', 'Galveston Island', 'Puget Sound',
-    'Potomac River', 'Waikiki Beach'.
+    'Potomac River', 'Waikiki Beach'. Provide this OR latitude+longitude.
+
+    latitude/longitude: Coordinates for nearest-station lookup when no
+    location name is available. Both are required together.
     """
+    has_coords = latitude is not None and longitude is not None
+    if not location and not has_coords:
+        return json.dumps({"error": "Provide location, or both latitude and longitude."})
+
+    query_params = {"location": location} if location else {"lat": latitude, "lon": longitude}
+    log_key = location or f"{latitude},{longitude}"
+
     import httpx
     base = os.environ.get("FASTAPI_URL", "http://localhost:8000")
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.get(f"{base}/fishing-guide", params={"location": location})
+            resp = await client.get(f"{base}/fishing-guide", params=query_params)
             if resp.status_code == 404:
-                _log_tool_call(location, None, None, None, success=False, error="location not found")
-                return json.dumps({"error": f"Location not found: {location}. Try a more specific name."})
+                _log_tool_call(log_key, None, None, None, success=False, error="location not found")
+                return json.dumps({"error": f"Location not found: {log_key}. Try a more specific name or nearby coordinates."})
             resp.raise_for_status()
             data = resp.json()
     except httpx.TimeoutException:
-        _log_tool_call(location, None, None, None, success=False, error="timeout")
+        _log_tool_call(log_key, None, None, None, success=False, error="timeout")
         return json.dumps({"error": "Request timed out — data source temporarily slow, try again"})
     except Exception as e:
-        _log_tool_call(location, None, None, None, success=False, error=str(e))
+        _log_tool_call(log_key, None, None, None, success=False, error=str(e))
         return json.dumps({"error": str(e)})
 
     tides = data.get("tides") or []
@@ -642,7 +769,7 @@ async def get_water_conditions(location: str) -> str:
         source = "seatemperature.info"
 
     result = {
-        "location":       data.get("site_name", location),
+        "location":       data.get("site_name", log_key),
         "temp_f":         data.get("temp_f"),
         "temp_c":         data.get("temp_c"),
         "temp_f_min":     data.get("temp_f_min"),
@@ -650,9 +777,10 @@ async def get_water_conditions(location: str) -> str:
         "source":         source,
         "tides":          tide_list if tide_list else None,
         "data_freshness": data.get("data_freshness"),
+        "distance_km":    data.get("distance_km"),
     }
     result = {k: v for k, v in result.items() if v is not None}
-    _log_tool_call(location, result.get("location"), result.get("temp_f"), source, success=True)
+    _log_tool_call(log_key, result.get("location"), result.get("temp_f"), source, success=True)
     return json.dumps(result, indent=2)
 
 

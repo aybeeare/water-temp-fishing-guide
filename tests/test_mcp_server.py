@@ -75,13 +75,16 @@ async def test_handshake_step1_tool_has_description():
 
 @pytest.mark.asyncio
 async def test_handshake_step1_input_schema():
-    """Input schema must declare location as a required string parameter."""
+    """Input schema must declare location as a string param, and
+    latitude/longitude as an alternative numeric input — none required
+    individually, since the tool accepts location OR lat+lon."""
     tools = await list_tools()
     schema = tools[0].inputSchema
     assert schema["type"] == "object"
     assert "location" in schema["properties"]
     assert schema["properties"]["location"]["type"] == "string"
-    assert "location" in schema["required"]
+    assert schema["properties"]["latitude"]["type"] == "number"
+    assert schema["properties"]["longitude"]["type"] == "number"
 
 
 # ---------------------------------------------------------------------------
