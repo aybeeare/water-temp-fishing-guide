@@ -132,7 +132,7 @@ def sites_needing_refresh(conn: sqlite3.Connection, site_ids: list[str]) -> list
     return stale
 
 
-def fetch_usgs(site_ids: list[str]) -> Optional[dict]:
+def fetch_usgs(site_ids: list[str], timeout: float = 15) -> Optional[dict]:
     params = {
         "sites":       ",".join(site_ids),
         "parameterCd": "00010",
@@ -140,7 +140,7 @@ def fetch_usgs(site_ids: list[str]) -> Optional[dict]:
     }
     headers = {"X-Api-Key": USGS_API_KEY}
     try:
-        resp = httpx.get(USGS_IV_URL, params=params, headers=headers, timeout=15)
+        resp = httpx.get(USGS_IV_URL, params=params, headers=headers, timeout=timeout)
         resp.raise_for_status()
         return resp.json()
     except httpx.HTTPError as exc:
@@ -236,10 +236,28 @@ def parse_usgs_rdb(text: str) -> list[dict]:
 # OC-CO=coastal ocean.
 USGS_SURFACE_WATER_SITE_TYPES = "ST,ST-CA,LK,ES,OC,OC-CO"
 
+# USGS has no stations outside the US and territories — same NA+Caribbean
+# bounding box used by scripts/build_osm_beach_list.py's OSM query
+# (15°N-85°N, 170°W-52°W). Coordinates outside this box skip the live USGS
+# call entirely: it would only ever come back empty, and the Site Service can
+# be slow (seconds to tens of seconds) even when it has nothing to return,
+# which is what made international coordinate lookups (e.g. the Adriatic Sea)
+# time out for MCP clients before this check existed.
+USGS_COVERAGE_BBOX = (15, -170, 85, -52)  # (lat_min, lon_min, lat_max, lon_max)
+
+
+def _in_usgs_coverage_area(lat: float, lon: float) -> bool:
+    lat_min, lon_min, lat_max, lon_max = USGS_COVERAGE_BBOX
+    return lat_min <= lat <= lat_max and lon_min <= lon <= lon_max
+
 
 def fetch_usgs_sites_in_bbox(lat: float, lon: float, radius_deg: float = 0.25) -> list[dict]:
     """Live metadata lookup (not the hot-path reading fetch, so no retry loop —
-    matches this module's existing single-attempt pattern for fetch_usgs)."""
+    matches this module's existing single-attempt pattern for fetch_usgs).
+    Tighter timeout than fetch_usgs's default since this is purely a
+    coordinate-search convenience call, not a data path anything else depends
+    on — better to fail fast and let the caller fall through to NOAA/scrape
+    than block a request for tens of seconds."""
     params = {
         "format":         "rdb",
         "bBox":           build_bbox(lat, lon, radius_deg),
@@ -254,7 +272,7 @@ def fetch_usgs_sites_in_bbox(lat: float, lon: float, radius_deg: float = 0.25) -
     }
     headers = {"X-Api-Key": USGS_API_KEY}
     try:
-        resp = httpx.get(USGS_SITE_SERVICE_URL, params=params, headers=headers, timeout=25)
+        resp = httpx.get(USGS_SITE_SERVICE_URL, params=params, headers=headers, timeout=10)
         resp.raise_for_status()
         return parse_usgs_rdb(resp.text)
     except httpx.HTTPError as exc:
@@ -263,7 +281,7 @@ def fetch_usgs_sites_in_bbox(lat: float, lon: float, radius_deg: float = 0.25) -
 
 
 def find_nearest_usgs_site(lat: float, lon: float, radius_deg: float = 0.25,
-                            max_km: float = 50.0, max_candidates_to_verify: int = 5) -> Optional[dict]:
+                            max_km: float = 50.0, max_candidates_to_verify: int = 3) -> Optional[dict]:
     """Rank bBox candidates by real haversine distance (the bBox result is an
     unsorted rectangle, not a nearest-first list), then verify against the
     live IV endpoint nearest-first.
@@ -274,6 +292,9 @@ def find_nearest_usgs_site(lat: float, lon: float, radius_deg: float = 0.25,
     nearest bbox match can still turn out to have no current reading; walk
     outward to the next-nearest candidate rather than failing outright.
     """
+    if not _in_usgs_coverage_area(lat, lon):
+        return None
+
     candidates = fetch_usgs_sites_in_bbox(lat, lon, radius_deg)
     if not candidates:
         return None
@@ -286,7 +307,7 @@ def find_nearest_usgs_site(lat: float, lon: float, radius_deg: float = 0.25,
     ranked = [c for c in ranked if c["distance_km"] <= max_km]
 
     for candidate in ranked[:max_candidates_to_verify]:
-        live = fetch_usgs([candidate["site_id"]])
+        live = fetch_usgs([candidate["site_id"]], timeout=10)
         if live and parse_usgs_response(live):
             return candidate
 

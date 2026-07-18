@@ -246,8 +246,16 @@ def test_find_nearest_usgs_site_beyond_threshold(httpx_mock: HTTPXMock):
     assert result is None
 
 def test_find_nearest_usgs_site_no_candidates(httpx_mock: HTTPXMock):
+    # In-bounds coordinate (middle of the US) so the coverage-area check
+    # doesn't short-circuit before the HTTP call this test is exercising.
     httpx_mock.add_response(text="#\n# no data\n")
-    result = find_nearest_usgs_site(0.0, 0.0)
+    result = find_nearest_usgs_site(39.0, -98.0)
+    assert result is None
+
+def test_find_nearest_usgs_site_outside_coverage_area_skips_http_call():
+    # No httpx_mock registered — a real HTTP call here would fail the test,
+    # proving the coverage-area check short-circuits before any request fires.
+    result = find_nearest_usgs_site(41.855, 17.29)  # Adriatic Sea
     assert result is None
 
 
