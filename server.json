@@ -1,17 +1,17 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
   "name": "io.github.aybeeare/water-conditions",
-  "description": "Real-time water temperature and tides for 8,000+ locations via NOAA, USGS, and seatemperature.info.",
+  "description": "Real-time water temperature and tides for 8,000+ locations via NOAA, USGS, and seatemperature.info — by name or latitude/longitude coordinates.",
   "repository": {
     "url": "https://github.com/aybeeare/water-temp-fishing-guide",
     "source": "github"
   },
-  "version": "1.0.1",
+  "version": "1.1.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "water-conditions-mcp",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "transport": {
         "type": "streamable-http",
         "url": "https://water-temp-fishing-guide-production.up.railway.app/mcp"

@@ -576,10 +576,12 @@ async def mcp_server_card():
             {
                 "name": "get_water_conditions",
                 "description": (
-                    "Get real-time water temperature and tide predictions for any lake, river, "
-                    "ocean, bay, or beach location. Data sourced live from NOAA CO-OPS, USGS, "
-                    "and seatemperature.info — not from training data. "
-                    "Coverage: 8,000+ locations across North America and major international bodies."
+                    "Get real-time water temperature and tide prediction data for any lake, river, "
+                    "ocean, bay, or beach by name or latitude/longitude coordinates. Data sourced "
+                    "live from NOAA CO-OPS, USGS, and seatemperature.info — not from training data — "
+                    "with automatic nearest-station matching for coordinate inputs. Coverage includes "
+                    "8,000+ named locations across North America and major international bodies, "
+                    "with string to coordinate geocoding for fallback."
                 ),
                 "inputSchema": {
                     "type": "object",
@@ -717,10 +719,12 @@ def _log_tool_call(
 
 @_fastmcp.tool(
     description=(
-        "Get real-time water temperature and tide predictions for any lake, river, "
-        "ocean, bay, or beach location. Data sourced live from NOAA CO-OPS, USGS, "
-        "and seatemperature.info — not from training data. "
-        "Coverage: 8,000+ locations across North America and major international bodies. "
+        "Get real-time water temperature and tide prediction data for any lake, river, "
+        "ocean, bay, or beach by name or latitude/longitude coordinates. Data sourced "
+        "live from NOAA CO-OPS, USGS, and seatemperature.info — not from training data — "
+        "with automatic nearest-station matching for coordinate inputs. Coverage includes "
+        "8,000+ named locations across North America and major international bodies, "
+        "with string to coordinate geocoding for fallback. "
         "Use this whenever a user asks about current water temperature, beach or "
         "swimming conditions, boating, surfing, fishing, tide times, or any question "
         "requiring real-time water data."

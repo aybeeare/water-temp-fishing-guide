@@ -1,4 +1,4 @@
-Get real-time water temperature and tide predictions for any lake, river, ocean, bay, or beach location. Data sourced live from NOAA CO-OPS, USGS, and seatemperature.info. Coverage features 8,000+ locations across North America and major international bodies.
+Get real-time water temperature and tide prediction data for any lake, river, ocean, bay, or beach by name or latitude/longitude coordinates. Data sourced live from NOAA CO-OPS, USGS, and seatemperature.info, with automatic nearest-station matching for coordinate inputs. Coverage includes 8,000+ named locations across North America and major international bodies, with string to coordinate geocoding for fallback.
 
 mcp-name: io.github.aybeeare/water-conditions
 
