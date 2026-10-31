@@ -30,3 +30,6 @@ water-conditions-mcp = "mcp_server.server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["mcp_server"]
+
+[tool.hatch.build.targets.sdist]
+include = ["mcp_server", "README.md", "pyproject.toml"]
