@@ -73,6 +73,7 @@ def patch_db(seeded_db, monkeypatch):
     import ingest.geocode_ingest       as geocode
     import ingest.sea_temp_scraper     as scraper
     import ingest.places_ingest        as places
+    import ingest.usgs_site_index      as usgs_index
     import api.main                    as api_main
 
     monkeypatch.setattr(usgs,        "DB_PATH", seeded_db)
@@ -82,5 +83,6 @@ def patch_db(seeded_db, monkeypatch):
     monkeypatch.setattr(geocode,     "DB_PATH", seeded_db)
     monkeypatch.setattr(scraper,     "DB_PATH", seeded_db)
     monkeypatch.setattr(places,      "DB_PATH", seeded_db)
+    monkeypatch.setattr(usgs_index,  "DB_PATH", seeded_db)
     monkeypatch.setattr(api_main,    "DB_PATH", seeded_db)
     return seeded_db

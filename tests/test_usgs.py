@@ -232,7 +232,31 @@ def test_fetch_usgs_sites_in_bbox_http_error(httpx_mock: HTTPXMock):
     sites = fetch_usgs_sites_in_bbox(38.65, -90.15)
     assert sites == []
 
-def test_find_nearest_usgs_site_verifies_live_data(httpx_mock: HTTPXMock):
+@pytest.fixture
+def no_usgs_index(monkeypatch):
+    """Force the live bBox fallback path (as if usgs_site_index were empty)."""
+    monkeypatch.setattr(usgs_mod, "_indexed_candidates", lambda *a, **k: None)
+
+
+def test_find_nearest_usgs_site_uses_local_index(patch_db, httpx_mock: HTTPXMock):
+    """With the index built, no live bBox call is made — only IV verification."""
+    import sqlite3
+    conn = sqlite3.connect(patch_db)
+    conn.executemany(
+        "INSERT INTO usgs_site_index (site_id, site_name, lat, lon, state, fetched_at) VALUES (?,?,?,?,?,?)",
+        [("07010000", "MISSISSIPPI RIVER AT ST. LOUIS, MO", 38.6289, -90.1797, "MO", "2099-01-01T00:00:00+00:00"),
+         ("99999999", "FAR AWAY SITE", 45.0, -100.0, "SD", "2099-01-01T00:00:00+00:00")],
+    )
+    conn.commit()
+    conn.close()
+    httpx_mock.add_response(json=SAMPLE_USGS_RESPONSE)    # live IV verification only
+    result = find_nearest_usgs_site(38.65, -90.15, max_km=50)
+    assert result is not None
+    assert result["site_id"] == "07010000"
+    assert len(httpx_mock.get_requests()) == 1
+
+
+def test_find_nearest_usgs_site_verifies_live_data(httpx_mock: HTTPXMock, no_usgs_index):
     httpx_mock.add_response(text=SAMPLE_USGS_RDB)         # bbox site search
     httpx_mock.add_response(json=SAMPLE_USGS_RESPONSE)    # live IV verification, site_id matches
     result = find_nearest_usgs_site(38.65, -90.15, max_km=50)
@@ -240,12 +264,12 @@ def test_find_nearest_usgs_site_verifies_live_data(httpx_mock: HTTPXMock):
     assert result["site_id"] == "07010000"
     assert "distance_km" in result
 
-def test_find_nearest_usgs_site_beyond_threshold(httpx_mock: HTTPXMock):
+def test_find_nearest_usgs_site_beyond_threshold(httpx_mock: HTTPXMock, no_usgs_index):
     httpx_mock.add_response(text=SAMPLE_USGS_RDB)  # site is ~3km away, threshold excludes it
     result = find_nearest_usgs_site(38.65, -90.15, max_km=0.01)
     assert result is None
 
-def test_find_nearest_usgs_site_no_candidates(httpx_mock: HTTPXMock):
+def test_find_nearest_usgs_site_no_candidates(httpx_mock: HTTPXMock, no_usgs_index):
     # In-bounds coordinate (middle of the US) so the coverage-area check
     # doesn't short-circuit before the HTTP call this test is exercising.
     httpx_mock.add_response(text="#\n# no data\n")

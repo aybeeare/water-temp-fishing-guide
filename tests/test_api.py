@@ -40,7 +40,7 @@ def test_no_params_returns_400(patch_db):
 
 def test_usgs_cache_hit_by_location(patch_db):
     """lake-michigan alias → site 04085427 → already in seeded water_cache."""
-    with patch("api.main.run_ingest") as mock_ingest:
+    with patch("ingest.usgs_ingest.fetch_usgs") as mock_fetch:
         client = make_client(patch_db)
         resp = client.get("/fishing-guide", params={"location": "lake michigan"})
 
@@ -49,8 +49,9 @@ def test_usgs_cache_hit_by_location(patch_db):
     assert body["temp_f"] == pytest.approx(68.0, abs=0.1)
     assert "Lake Michigan" in body["site_name"]
     assert "68" in body["spoken_response"]
-    # Should NOT have triggered a live ingest — data was fresh
-    mock_ingest.assert_not_called()
+    assert body["source"] == "usgs"
+    # run_ingest's TTL gate should skip the network call — data was fresh
+    mock_fetch.assert_not_called()
 
 
 def test_usgs_cache_miss_triggers_ingest(patch_db, monkeypatch):
@@ -420,3 +421,91 @@ def test_sensor_offline_when_fallback_also_fails(patch_db, monkeypatch):
     body = resp.json()
     assert body["temp_f"] is None
     assert "offline" in body["spoken_response"].lower()
+
+
+# ---------------------------------------------------------------------------
+# Stale readings, source labelling, bait shop opt-out, scrape-vs-regional
+# ---------------------------------------------------------------------------
+
+def _age_reading(db_path, site_id, observed_iso):
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    conn.execute("UPDATE water_cache SET raw_datetime = ? WHERE site_id = ?", (observed_iso, site_id))
+    conn.commit()
+    conn.close()
+
+
+def test_stale_reading_falls_back_to_scraper(patch_db):
+    """A months-old USGS reading is not served as current; the scraper fills in."""
+    _age_reading(patch_db, "04085427", "2026-06-26T02:59:00+00:00")
+    fallback = {"temp_f": 55.5, "temp_c": 13.06, "temp_f_min": 50.7, "temp_f_max": 60.4}
+    with patch("ingest.usgs_ingest.fetch_usgs"), \
+         patch("api.main.scrape_and_cache", return_value=fallback) as mock_scrape:
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"location": "lake michigan"})
+
+    body = resp.json()
+    mock_scrape.assert_called_once_with("lake-michigan")
+    assert body["temp_f"] == pytest.approx(55.5)
+    assert body["temp_f_min"] == pytest.approx(50.7)
+    assert body["source"] == "seatemperature.info"
+
+
+def test_stale_reading_without_fallback_reports_offline(patch_db):
+    _age_reading(patch_db, "04085427", "2026-06-26T02:59:00+00:00")
+    with patch("ingest.usgs_ingest.fetch_usgs"), \
+         patch("api.main.scrape_and_cache", return_value=None):
+        client = make_client(patch_db)
+        resp = client.get("/fishing-guide", params={"location": "lake michigan"})
+
+    body = resp.json()
+    assert body["temp_f"] is None
+    assert "offline" in body["spoken_response"]
+
+
+def test_fresh_reading_reports_observed_at(patch_db):
+    from datetime import datetime, timezone, timedelta
+    recent = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
+    _age_reading(patch_db, "04085427", recent)
+    with patch("ingest.usgs_ingest.fetch_usgs"):
+        client = make_client(patch_db)
+        body = client.get("/fishing-guide", params={"location": "lake michigan"}).json()
+    assert body["temp_f"] == pytest.approx(68.0)
+    assert body["observed_at"].startswith(recent[:16])
+
+
+def test_bait_shop_opt_out_skips_places(patch_db):
+    with patch("ingest.usgs_ingest.fetch_usgs"), \
+         patch("api.main.lookup_bait_shop") as mock_shop:
+        client = make_client(patch_db)
+        client.get("/fishing-guide", params={"location": "lake michigan", "bait_shop": "false"})
+    mock_shop.assert_not_called()
+
+
+def test_close_scrape_location_beats_regional_noaa(patch_db):
+    """Gov station is only regional (67 km) — a scrape page under 1 km away wins."""
+    noaa_far   = {"station_id": "8454000", "site_name": "Providence", "lat": 41.8, "lon": -71.4, "distance_km": 67.0}
+    scrape_hit = {"slug": "lake-tahoe", "site_name": "Lake Tahoe", "lat": 39.1, "lon": -120.0, "distance_km": 0.7}
+    with patch("api.main.find_nearest_noaa_station", return_value=noaa_far), \
+         patch("api.main.find_nearest_usgs_site", return_value=None), \
+         patch("api.main.find_nearest_scrape_location", return_value=scrape_hit), \
+         patch("api.main.is_cache_fresh", return_value=True):
+        client = make_client(patch_db)
+        body = client.get("/fishing-guide", params={"lat": 39.1, "lon": -120.0}).json()
+    assert body["site_id"] == "lake-tahoe"
+    assert body["source"] == "seatemperature.info"
+    assert body["distance_km"] == pytest.approx(0.7)
+
+
+def test_local_noaa_beats_scrape(patch_db):
+    """Gov station within GOV_LOCAL_KM keeps priority even if a scrape page is closer."""
+    noaa_near  = {"station_id": "8443970", "site_name": "Boston Harbor, MA", "lat": 42.35, "lon": -71.05, "distance_km": 2.0}
+    scrape_hit = {"slug": "lake-tahoe", "site_name": "Lake Tahoe", "lat": 42.35, "lon": -71.05, "distance_km": 0.5}
+    with patch("api.main.find_nearest_noaa_station", return_value=noaa_near), \
+         patch("api.main.find_nearest_usgs_site", return_value=None), \
+         patch("api.main.find_nearest_scrape_location", return_value=scrape_hit), \
+         patch("api.main.noaa_cache_fresh", return_value=True):
+        client = make_client(patch_db)
+        body = client.get("/fishing-guide", params={"lat": 42.35, "lon": -71.05}).json()
+    assert body["site_id"] == "8443970"
+    assert body["source"] == "noaa"

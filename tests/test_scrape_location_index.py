@@ -121,3 +121,28 @@ def test_find_nearest_scrape_location_no_entries(db_path):
     result = find_nearest_scrape_location(conn, 39.10, -120.03, max_km=150)
     conn.close()
     assert result is None
+
+
+# ---------------------------------------------------------------------------
+# Country qualification for geocoding
+# ---------------------------------------------------------------------------
+
+def test_qualified_name_uses_breadcrumb_country():
+    from ingest.scrape_location_index import qualified_name
+    html = ("<div class=x21><a href='/'>Home</a> > "
+            "<a href=/senegal-water-temperature.html>Senegal</a> > Saint Louis</div>")
+    assert qualified_name("saint-louis", html) == "Saint Louis, Senegal"
+
+
+def test_qualified_name_us_state_and_country():
+    from ingest.scrape_location_index import qualified_name
+    html = ("<div class=x21><a href='/'>Home</a> > <a href=/us.html>United States</a> > "
+            "<a href=/ne.html>New England</a> > <a href=/ma.html>Massachusetts</a> > Boston</div>")
+    assert qualified_name("boston", html) == "Boston, Massachusetts, United States"
+
+
+def test_qualified_name_lake_hub_falls_back_to_place_note():
+    from ingest.scrape_location_index import qualified_name
+    html = ("<div class=x21><a href='/'>Home</a> > Lake Geneva</div>"
+            "<p>The warmest water temperature Lake Geneva today is 14.3&deg;C (in Coppet, Switzerland)</p>")
+    assert qualified_name("lake-geneva", html) == "Lake Geneva, Switzerland"

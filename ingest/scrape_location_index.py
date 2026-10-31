@@ -13,13 +13,18 @@ as ingest/noaa_station_index.py. Run standalone:
     python -m ingest.scrape_location_index
 """
 import os
+import re
 import sqlite3
 import logging
 from datetime import datetime, timezone
 from typing import Optional
 
+import httpx
+from bs4 import BeautifulSoup
+
 from ingest.geo import haversine_km
 from ingest.geocode_ingest import geocode_location
+from ingest.sea_temp_scraper import HEADERS, build_url
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +50,46 @@ def enumerate_scrape_slugs(conn: sqlite3.Connection) -> list[str]:
 # Backfill
 # ---------------------------------------------------------------------------
 
+_PAREN_PLACE_RE = re.compile(r"\(in [^,()]+, ([^()]+)\)")
+
+
+def page_region(html: str) -> list[str]:
+    """Region names for a seatemperature.info page, broadest first.
+
+    Uses the breadcrumb ("Home > Senegal > Saint Louis" → ["Senegal"]). Lake hub
+    pages have no country in the breadcrumb, so fall back to the countries in
+    "(in Coppet, Switzerland)" style notes in the page copy.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    crumb = soup.select_one("div.x21")
+    if crumb:
+        parts = [a.get_text(strip=True) for a in crumb.find_all("a")]
+        parts = [p for p in parts if p and p.lower() != "home"]
+        if parts:
+            return parts
+    m = _PAREN_PLACE_RE.search(soup.get_text(" ", strip=True))
+    return [m.group(1).strip()] if m else []
+
+
+def qualified_name(slug: str, html: Optional[str] = None) -> str:
+    """'saint-louis' → 'Saint Louis, Senegal' so geocoding lands in the right country."""
+    base = slug.replace("-", " ").title()
+    if html is None:
+        try:
+            resp = httpx.get(build_url(slug), headers=HEADERS, timeout=15, follow_redirects=True)
+            html = resp.text if resp.status_code == 200 else ""
+        except httpx.HTTPError:
+            html = ""
+    region = page_region(html) if html else []
+    if not region:
+        return base
+    # Most specific region, then country: "Boston, Massachusetts, United States"
+    parts = [base, region[-1]]
+    if region[0] != region[-1]:
+        parts.append(region[0])
+    return ", ".join(parts)
+
+
 def backfill_scrape_location_index(conn: sqlite3.Connection) -> int:
     """
     Geocode every known scrape slug and upsert into scrape_location_index.
@@ -60,7 +105,9 @@ def backfill_scrape_location_index(conn: sqlite3.Connection) -> int:
 
     for slug in slugs:
         site_name = slug.replace("-", " ").title()
-        coords = geocode_location(site_name)
+        # Qualify with the page's country so e.g. 'saint-louis' (Senegal)
+        # doesn't geocode to St. Louis, Missouri.
+        coords = geocode_location(qualified_name(slug))
         if coords is None:
             log.info("Could not geocode scrape slug %r — skipping", slug)
             continue

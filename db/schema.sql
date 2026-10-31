@@ -95,6 +95,20 @@ CREATE TABLE IF NOT EXISTS noaa_station_index (
     fetched_at  TEXT    NOT NULL       -- ISO-8601 UTC, when this snapshot was pulled
 );
 
+-- ── usgs_site_index ──────────────────────────────────────────────────────────
+-- Snapshot of active USGS surface-water sites reporting live water temperature
+-- (parameter 00010), pulled state by state from the Site Service by
+-- ingest/usgs_site_index.py. Replaces the live bBox query for coordinate
+-- lookups, which routinely took 10s+ and timed out. Refreshed manually/rarely.
+CREATE TABLE IF NOT EXISTS usgs_site_index (
+    site_id     TEXT    PRIMARY KEY,   -- USGS site number, matches water_cache.site_id once ingested
+    site_name   TEXT    NOT NULL,
+    lat         REAL    NOT NULL,
+    lon         REAL    NOT NULL,
+    state       TEXT,
+    fetched_at  TEXT    NOT NULL
+);
+
 -- ── scrape_location_index ────────────────────────────────────────────────────
 -- One-time geocoding backfill of every scrape-source slug already known in
 -- location_aliases. seatemperature.info pages expose no coordinates of their

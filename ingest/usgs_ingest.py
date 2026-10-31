@@ -280,6 +280,19 @@ def fetch_usgs_sites_in_bbox(lat: float, lon: float, radius_deg: float = 0.25) -
         return []
 
 
+def _indexed_candidates(lat: float, lon: float, max_km: float, limit: int) -> Optional[list[dict]]:
+    """Nearest sites from the local usgs_site_index, or None if it isn't built."""
+    from ingest.usgs_site_index import nearest_usgs_sites  # avoid circular import
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        try:
+            return nearest_usgs_sites(conn, lat, lon, max_km, limit)
+        finally:
+            conn.close()
+    except sqlite3.OperationalError:
+        return None
+
+
 def find_nearest_usgs_site(lat: float, lon: float, radius_deg: float = 0.25,
                             max_km: float = 50.0, max_candidates_to_verify: int = 3) -> Optional[dict]:
     """Rank bBox candidates by real haversine distance (the bBox result is an
@@ -295,16 +308,18 @@ def find_nearest_usgs_site(lat: float, lon: float, radius_deg: float = 0.25,
     if not _in_usgs_coverage_area(lat, lon):
         return None
 
-    candidates = fetch_usgs_sites_in_bbox(lat, lon, radius_deg)
-    if not candidates:
-        return None
-
-    ranked = sorted(
-        ({**c, "distance_km": round(haversine_km(lat, lon, c["lat"], c["lon"]), 2)}
-         for c in candidates),
-        key=lambda c: c["distance_km"],
-    )
-    ranked = [c for c in ranked if c["distance_km"] <= max_km]
+    ranked = _indexed_candidates(lat, lon, max_km, max_candidates_to_verify)
+    if ranked is None:
+        # Local index not built — fall back to the (slow) live bBox search.
+        candidates = fetch_usgs_sites_in_bbox(lat, lon, radius_deg)
+        if not candidates:
+            return None
+        ranked = sorted(
+            ({**c, "distance_km": round(haversine_km(lat, lon, c["lat"], c["lon"]), 2)}
+             for c in candidates),
+            key=lambda c: c["distance_km"],
+        )
+        ranked = [c for c in ranked if c["distance_km"] <= max_km]
 
     for candidate in ranked[:max_candidates_to_verify]:
         live = fetch_usgs([candidate["site_id"]], timeout=10)

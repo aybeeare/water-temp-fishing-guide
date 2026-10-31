@@ -15,10 +15,10 @@ It translates MCP tool calls into HTTP requests to the shared FastAPI backend on
 
 | Tool | Description |
 |---|---|
-| `get_water_conditions` | Real-time temp + tides for any lake, river, ocean, bay, or beach |
-| `get_tide_predictions` | Today's high/low tide schedule for coastal locations |
+| `get_water_conditions` | Real-time temp + today's tides for any lake, river, ocean, bay, or beach, by name or lat/lon |
 
-Both tools accept natural language location names. The backend handles
+Tide predictions are included in the `get_water_conditions` response; there is
+no separate tide tool. The tool accepts natural language location names. The backend handles
 normalization, source selection (NOAA → USGS → scraper), caching, and fallback.
 
 **Coverage:** 8,000+ locations, 91%+ success rate on North American queries.
@@ -28,7 +28,7 @@ normalization, source selection (NOAA → USGS → scraper), caching, and fallba
 Environment variables:
 ```
 FASTAPI_URL            = https://water-temp-fishing-guide-production.up.railway.app
-ENABLE_BAIT_SHOP       = false    ← Google Places disabled for MCP (save quota)
+ENABLE_BAIT_SHOP       = true     ← leave on: Alexa shares this backend
 ASSOCIATES_TRACKING_ID = watertemperat-20
 ```
 
@@ -62,31 +62,39 @@ FASTAPI_URL=https://water-temp-fishing-guide-production.up.railway.app python mc
 
 ## Response Schema
 
+The MCP server calls `/fishing-guide` with `bait_shop=false`, so agent
+queries never spend Google Places quota (Alexa queries still get the shop).
+
 `get_water_conditions` returns:
 ```json
 {
-  "location": "Revere Beach",
-  "temp_f": 63.3,
-  "temp_c": 17.39,
+  "location": "Chesapeake Bay",
+  "temp_f": 63.7,
+  "temp_c": 17.61,
   "source": "noaa",
   "tides": [
-    { "type": "high", "time": "06:42", "height_ft": 8.3 },
-    { "type": "low",  "time": "12:58", "height_ft": 1.1 }
+    { "type": "high", "time": "01:25", "height_ft": 2.49 },
+    { "type": "low",  "time": "07:28", "height_ft": 0.34 }
   ],
-  "data_freshness": "2026-06-25T20:52:29Z"
+  "observed_at": "2026-10-31T18:36:00+00:00",
+  "data_freshness": "2026-10-31T18:44:03Z"
 }
 ```
 
-`get_tide_predictions` returns:
+- `source` is where the temperature actually came from (`noaa`, `usgs`, or
+  `seatemperature.info`). It can differ from the matched station when that
+  station's sensor is offline and the scraper filled in.
+- `observed_at` is when the reading was taken. Readings older than
+  `STALE_READING_HOURS` (default 24) are never returned as current.
+- `distance_km` appears for coordinate lookups.
+- `note` appears when no current temperature is available.
+
+Ambiguous names return a clarification instead of data:
 ```json
 {
-  "location": "Boston Harbor",
-  "date": "2026-06-25",
-  "tides": [
-    { "type": "high", "time": "06:42", "height_ft": 8.3 },
-    { "type": "low",  "time": "12:58", "height_ft": 1.1 }
-  ],
-  "note": "Times are local to the station. Heights in feet above MLLW."
+  "needs_clarification": true,
+  "message": "'Ocean City' matches more than one place. Ask the user which one they mean, then call get_water_conditions again with that option as location.",
+  "options": ["Ocean City, Maryland", "Ocean City, New Jersey"]
 }
 ```
 

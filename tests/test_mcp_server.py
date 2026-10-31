@@ -44,7 +44,8 @@ FAKE_API_RESPONSE = {
     "disambiguation":       None,
 }
 
-ALEXA_ONLY_FIELDS = {"alexa_directive", "secondary_directive", "spoken_response", "sponsor_script"}
+ALEXA_ONLY_FIELDS = {"alexa_directive", "secondary_directive", "spoken_response", "sponsor_script",
+                     "nearby_shop", "recommended_gear"}
 
 
 # ---------------------------------------------------------------------------
@@ -62,7 +63,7 @@ async def test_handshake_step1_returns_one_tool():
 async def test_handshake_step1_tool_name():
     """Tool name must be stable — LLM agents reference it by name in code."""
     tools = await list_tools()
-    assert tools[0].name == "get_fishing_conditions"
+    assert tools[0].name == "get_water_conditions"
 
 
 @pytest.mark.asyncio
@@ -95,7 +96,7 @@ async def test_handshake_step1_input_schema():
 async def test_handshake_step2_returns_text_content(httpx_mock: HTTPXMock):
     """call_tool() must return a list of TextContent — the MCP wire format."""
     httpx_mock.add_response(json=FAKE_API_RESPONSE)
-    result = await call_tool("get_fishing_conditions", {"location": "boston harbor"})
+    result = await call_tool("get_water_conditions", {"location": "boston harbor"})
     assert len(result) == 1
     assert result[0].type == "text"
 
@@ -104,7 +105,7 @@ async def test_handshake_step2_returns_text_content(httpx_mock: HTTPXMock):
 async def test_handshake_step2_response_is_valid_json(httpx_mock: HTTPXMock):
     """The TextContent payload must be valid JSON the LLM can parse."""
     httpx_mock.add_response(json=FAKE_API_RESPONSE)
-    result = await call_tool("get_fishing_conditions", {"location": "boston harbor"})
+    result = await call_tool("get_water_conditions", {"location": "boston harbor"})
     data = json.loads(result[0].text)
     assert isinstance(data, dict)
 
@@ -113,7 +114,7 @@ async def test_handshake_step2_response_is_valid_json(httpx_mock: HTTPXMock):
 async def test_handshake_step2_alexa_fields_stripped(httpx_mock: HTTPXMock):
     """Alexa cart directives and spoken_response must not reach LLM agents."""
     httpx_mock.add_response(json=FAKE_API_RESPONSE)
-    result = await call_tool("get_fishing_conditions", {"location": "boston harbor"})
+    result = await call_tool("get_water_conditions", {"location": "boston harbor"})
     data = json.loads(result[0].text)
     for field in ALEXA_ONLY_FIELDS:
         assert field not in data, f"Alexa field '{field}' should be stripped from MCP response"
@@ -123,18 +124,36 @@ async def test_handshake_step2_alexa_fields_stripped(httpx_mock: HTTPXMock):
 async def test_handshake_step2_core_fields_present(httpx_mock: HTTPXMock):
     """Core fishing data fields must be present for the LLM to reason over."""
     httpx_mock.add_response(json=FAKE_API_RESPONSE)
-    result = await call_tool("get_fishing_conditions", {"location": "boston harbor"})
+    result = await call_tool("get_water_conditions", {"location": "boston harbor"})
     data = json.loads(result[0].text)
-    for field in ("temp_f", "temp_c", "species", "tides", "recommended_gear"):
+    for field in ("temp_f", "temp_c", "source", "tides", "data_freshness"):
         assert field in data, f"Expected field '{field}' in MCP response"
 
 
 @pytest.mark.asyncio
 async def test_handshake_step2_empty_location_returns_error():
     """Empty location must return a clean error string, not raise an exception."""
-    result = await call_tool("get_fishing_conditions", {"location": ""})
+    result = await call_tool("get_water_conditions", {"location": ""})
     assert result[0].type == "text"
     assert "error" in result[0].text.lower()
+
+
+@pytest.mark.asyncio
+async def test_handshake_step2_disambiguation_returns_options(httpx_mock: HTTPXMock):
+    """Ambiguous names must surface the choices so the agent can ask the user."""
+    httpx_mock.add_response(json={
+        **FAKE_API_RESPONSE, "temp_f": None, "temp_c": None, "tides": None,
+        "disambiguation": [
+            {"label": "Ocean City, Maryland",   "slug": "/a"},
+            {"label": "Ocean City, New Jersey", "slug": "/b"},
+        ],
+    })
+    result = await call_tool("get_water_conditions", {"location": "ocean city"})
+    data = json.loads(result[0].text)
+    assert data["needs_clarification"] is True
+    assert data["options"] == ["Ocean City, Maryland", "Ocean City, New Jersey"]
+    request = httpx_mock.get_requests()[0]
+    assert request.url.params["bait_shop"] == "false"
 
 
 @pytest.mark.asyncio
@@ -148,7 +167,7 @@ async def test_handshake_step2_unknown_tool_raises():
 async def test_handshake_step2_api_error_returns_message(httpx_mock: HTTPXMock):
     """If the FastAPI backend returns an error, return a readable message not a crash."""
     httpx_mock.add_response(status_code=404, text="Not found")
-    result = await call_tool("get_fishing_conditions", {"location": "nowhere"})
+    result = await call_tool("get_water_conditions", {"location": "nowhere"})
     assert result[0].type == "text"
     assert "404" in result[0].text or "error" in result[0].text.lower()
 
@@ -167,10 +186,10 @@ async def test_mcp_integration_full_handshake():
 
     # Step 1
     tools = await list_tools()
-    assert tools[0].name == "get_fishing_conditions"
+    assert tools[0].name == "get_water_conditions"
 
     # Step 2
-    result = await call_tool("get_fishing_conditions", {"location": "boston harbor"})
+    result = await call_tool("get_water_conditions", {"location": "boston harbor"})
     data = json.loads(result[0].text)
     assert data.get("temp_f") is not None
     for field in ALEXA_ONLY_FIELDS:

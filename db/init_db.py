@@ -890,6 +890,22 @@ SITE_SPECIES_SEED = [
     # ── Scrape-only: Brazil / South America ─────────────────────────────────
     ("amazon-river", "peacock_bass"), ("amazon-river", "catfish"),
     ("pantanal",     "peacock_bass"), ("pantanal",     "catfish"),
+    # ── Replacement stations for retired/mis-mapped sites (2026-10-31) ───
+    ("lake-michigan", "walleye"), ("lake-michigan", "salmon"), ("lake-michigan", "smallmouth_bass"), ("lake-michigan", "trout"),
+    ("milwaukee", "walleye"), ("milwaukee", "salmon"), ("milwaukee", "smallmouth_bass"), ("milwaukee", "trout"),
+    ("chicago", "walleye"), ("chicago", "salmon"), ("chicago", "smallmouth_bass"),
+    ("9076070", "trout"), ("9076070", "walleye"), ("9076070", "smallmouth_bass"), ("9076070", "northern_pike"),
+    ("lake-erie", "walleye"), ("lake-erie", "smallmouth_bass"), ("lake-erie", "salmon"), ("lake-erie", "catfish"),
+    ("9063085", "walleye"), ("9063085", "smallmouth_bass"), ("9063085", "salmon"), ("9063085", "catfish"),
+    ("9063020", "walleye"), ("9063020", "smallmouth_bass"), ("9063020", "salmon"),
+    ("8518962", "striped_bass"), ("8518962", "largemouth_bass"), ("8518962", "smallmouth_bass"), ("8518962", "catfish"),
+    ("01638500", "largemouth_bass"), ("01638500", "smallmouth_bass"), ("01638500", "striped_bass"), ("01638500", "catfish"),
+    ("05587498", "largemouth_bass"), ("05587498", "catfish"), ("05587498", "walleye"),
+    ("06935550", "catfish"), ("06935550", "walleye"), ("06935550", "smallmouth_bass"),
+    ("03612600", "largemouth_bass"), ("03612600", "smallmouth_bass"), ("03612600", "catfish"), ("03612600", "walleye"),
+    ("12438000", "salmon"), ("12438000", "trout"), ("12438000", "smallmouth_bass"), ("12438000", "walleye"),
+    ("new-bern", "largemouth_bass"), ("new-bern", "striped_bass"), ("new-bern", "catfish"),
+    ("02232400", "largemouth_bass"), ("02232400", "catfish"),
 ]
 
 
@@ -901,49 +917,53 @@ SITE_SPECIES_SEED = [
 # source: 'usgs' | 'scrape'
 # ---------------------------------------------------------------------------
 ALIAS_SEED = [
-    # ── Great Lakes (USGS) ────────────────────────────────────────────────
-    ("lake-michigan",           "04085427",  "usgs"),
-    ("michigan",                "04085427",  "usgs"),
-    ("lake-michigan-milwaukee", "04085427",  "usgs"),
-    ("lake-michigan-chicago",   "04085068",  "usgs"),
+    # ── Great Lakes ───────────────────────────────────────────────────────
+    # Several of these originally pointed at small creeks/rivers (e.g. Lake
+    # Michigan → Manitowoc River) whose temperature sensors were retired years
+    # ago. Remapped 2026-10-31 to live NOAA stations on the lake, or to
+    # seatemperature.info's lake-wide pages.
+    ("lake-michigan",           "lake-michigan",  "scrape"),
+    ("michigan",                "lake-michigan",  "scrape"),
+    ("lake-michigan-milwaukee", "milwaukee",  "scrape"),
+    ("lake-michigan-chicago",   "chicago",  "scrape"),
     ("lake-superior",           "040851385", "usgs"),
     ("superior",                "040851385", "usgs"),
     ("lake-superior-duluth",    "040851385", "usgs"),
-    ("lake-superior-sault",     "04002000",  "usgs"),
+    ("lake-superior-sault",     "9076070",  "noaa"),
     ("lake-huron",              "04063700",  "usgs"),
     ("huron",                   "04063700",  "usgs"),
     ("lake-huron-mackinaw",     "04063700",  "usgs"),
     ("lake-michigan-muskegon",  "04124000",  "usgs"),
-    ("lake-erie",               "04173500",  "usgs"),
-    ("erie",                    "04173500",  "usgs"),
-    ("lake-erie-toledo",        "04173500",  "usgs"),
-    ("lake-erie-buffalo",       "04214500",  "usgs"),
+    ("lake-erie",               "lake-erie",  "scrape"),
+    ("erie",                    "lake-erie",  "scrape"),
+    ("lake-erie-toledo",        "9063085",  "noaa"),
+    ("lake-erie-buffalo",       "9063020",  "noaa"),
     ("lake-ontario",            "9052030",   "noaa"),
     ("ontario",                 "9052030",   "noaa"),
     ("lake-ontario-oswego",     "9052030",   "noaa"),
 
     # ── US Rivers (USGS) ─────────────────────────────────────────────────
-    ("hudson-river",            "01372500",  "usgs"),
-    ("the-hudson",              "01372500",  "usgs"),
-    ("potomac-river",           "01646500",  "usgs"),
-    ("the-potomac",             "01646500",  "usgs"),
-    ("mississippi-river",       "07010000",  "usgs"),
-    ("the-mississippi",         "07010000",  "usgs"),
-    ("missouri-river",          "06935965",  "usgs"),
-    ("the-missouri",            "06935965",  "usgs"),
-    ("ohio-river",              "03612500",  "usgs"),
-    ("the-ohio",                "03612500",  "usgs"),
+    ("hudson-river",            "8518962",  "noaa"),
+    ("the-hudson",              "8518962",  "noaa"),
+    ("potomac-river",           "01638500",  "usgs"),
+    ("the-potomac",             "01638500",  "usgs"),
+    ("mississippi-river",       "05587498",  "usgs"),
+    ("the-mississippi",         "05587498",  "usgs"),
+    ("missouri-river",          "06935550",  "usgs"),
+    ("the-missouri",            "06935550",  "usgs"),
+    ("ohio-river",              "03612600",  "usgs"),
+    ("the-ohio",                "03612600",  "usgs"),
     ("colorado-river",          "09380000",  "usgs"),
     ("the-colorado",            "09380000",  "usgs"),
-    ("columbia-river",          "12472600",  "usgs"),
-    ("the-columbia",            "12472600",  "usgs"),
+    ("columbia-river",          "12438000",  "usgs"),
+    ("the-columbia",            "12438000",  "usgs"),
     ("willamette-river",        "14211720",  "usgs"),
     ("the-willamette",          "14211720",  "usgs"),
     ("sacramento-river",        "11447650",  "usgs"),
     ("the-sacramento",          "11447650",  "usgs"),
-    ("neuse-river",             "02084557",  "usgs"),
-    ("st-johns-river",          "02232500",  "usgs"),
-    ("saint-johns-river",       "02232500",  "usgs"),
+    ("neuse-river",             "new-bern",  "scrape"),
+    ("st-johns-river",          "02232400",  "usgs"),
+    ("saint-johns-river",       "02232400",  "usgs"),
 
     # ── US Coastal/Bays with USGS proxy ──────────────────────────────────
     ("chesapeake-bay",          "01646500",  "usgs"),

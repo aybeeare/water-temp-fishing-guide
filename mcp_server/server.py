@@ -34,6 +34,11 @@ import mcp.types as types
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 
+try:
+    from mcp_server.formatting import format_conditions, query_params
+except ImportError:  # run directly as `python mcp_server/server.py`
+    from formatting import format_conditions, query_params
+
 FASTAPI_URL = os.environ.get(
     "FASTAPI_URL",
     "https://water-temp-fishing-guide-production.up.railway.app"
@@ -115,39 +120,13 @@ async def _get_water_conditions(arguments: dict) -> list[types.TextContent]:
     if not location and not has_coords:
         return [_error("Provide location, or both latitude and longitude.")]
 
-    params  = {"location": location} if location else {"lat": latitude, "lon": longitude}
     log_key = location or f"{latitude},{longitude}"
 
-    data, err = await _fetch(f"{FASTAPI_URL}/fishing-guide", params)
+    data, err = await _fetch(f"{FASTAPI_URL}/fishing-guide", query_params(location, latitude, longitude))
     if err:
         return [_error(err)]
 
-    tides = data.get("tides") or []
-    tide_list = [
-        {
-            "type":      "high" if t["tide_type"] == "H" else "low",
-            "time":      t["tide_time"].split(" ")[-1] if " " in t["tide_time"] else t["tide_time"],
-            "height_ft": t["height_ft"],
-        }
-        for t in tides
-    ]
-
-    result = {
-        "location":       data.get("site_name", log_key),
-        "temp_f":         data.get("temp_f"),
-        "temp_c":         data.get("temp_c"),
-        "temp_f_min":     data.get("temp_f_min"),
-        "temp_f_max":     data.get("temp_f_max"),
-        "source":         _source_label(data.get("site_id", "")),
-        "tides":          tide_list,
-        "data_freshness": data.get("data_freshness"),
-        "coverage_note":  _coverage_note(data),
-        "distance_km":    data.get("distance_km"),
-    }
-
-    # Remove None values for clean output
-    result = {k: v for k, v in result.items() if v is not None}
-
+    result = format_conditions(data, log_key)
     return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -173,22 +152,6 @@ async def _fetch(url: str, params: dict) -> tuple[dict, str]:
 
 def _error(msg: str) -> types.TextContent:
     return types.TextContent(type="text", text=json.dumps({"error": msg}))
-
-
-def _source_label(site_id: str) -> str:
-    if not site_id:
-        return "unknown"
-    if site_id.isdigit() and len(site_id) == 7:
-        return "noaa"
-    if site_id.isdigit() and len(site_id) >= 8:
-        return "usgs"
-    return "seatemperature.info"
-
-
-def _coverage_note(data: dict) -> str | None:
-    if data.get("temp_f_min") and data.get("temp_f_max"):
-        return "Range reflects readings across the water body, not a single point."
-    return None
 
 
 # ---------------------------------------------------------------------------

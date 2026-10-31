@@ -28,7 +28,12 @@ from pydantic import BaseModel
 from mcp.server.fastmcp import FastMCP
 
 from ingest.usgs_ingest import run_ingest, find_nearest_usgs_site
-from ingest.noaa_ingest import run_noaa_ingest_for, NOAA_STATIONS, upsert_tides
+from ingest.noaa_ingest import (
+    run_noaa_ingest_for,
+    NOAA_STATIONS,
+    upsert_tides,
+    is_cache_fresh as noaa_cache_fresh,
+)
 from ingest.noaa_station_index import find_nearest_noaa_station
 from ingest.scrape_location_index import find_nearest_scrape_location
 from ingest.geocode_ingest import geocode_location
@@ -39,6 +44,7 @@ from ingest.sea_temp_scraper import (
     get_disambiguation_options,
 )
 from ingest.places_ingest import lookup_bait_shop, format_shop_speech
+from mcp_server.formatting import format_conditions, query_params as mcp_query_params
 
 log = logging.getLogger("uvicorn.error")
 
@@ -104,6 +110,8 @@ class FishingGuideResponse(BaseModel):
     species:               Optional[list[str]]            = None
     distance_km:           Optional[float]                = None  # populated only when resolved via lat/lon
     resolved_via:          Optional[str]                  = None  # "coordinates" | "alias" | "site_id" | "geocoded"
+    source:                Optional[str]                  = None  # where the temperature came from: "usgs" | "noaa" | "seatemperature.info"
+    observed_at:           Optional[str]                  = None  # ISO-8601 UTC time of the reading itself
 
 
 # ---------------------------------------------------------------------------
@@ -252,28 +260,59 @@ def build_spoken_response(site_name: str, temp_f: float, temp_c: float,
 # ---------------------------------------------------------------------------
 
 async def resolve_usgs(site_id: str) -> Optional[sqlite3.Row]:
+    # run_ingest skips sites whose cache is within its TTL, so this only hits
+    # USGS when the reading is missing or stale.
+    run_ingest(site_ids=[site_id])
     conn = get_db()
     row  = lookup_water_cache(conn, site_id)
     conn.close()
-    if row is None:
-        run_ingest(site_ids=[site_id])
-        conn = get_db()
-        row  = lookup_water_cache(conn, site_id)
-        conn.close()
     return row
 
 
 async def resolve_noaa(site_id: str) -> Optional[sqlite3.Row]:
+    conn  = get_db()
+    fresh = noaa_cache_fresh(conn, site_id)
+    conn.close()
+    if not fresh:
+        site_name = NOAA_STATION_NAMES.get(site_id, site_id)
+        run_noaa_ingest_for(site_id, site_name)
     conn = get_db()
     row  = lookup_water_cache(conn, site_id)
     conn.close()
-    if row is None:
-        site_name = NOAA_STATION_NAMES.get(site_id, site_id)
-        run_noaa_ingest_for(site_id, site_name)
-        conn = get_db()
-        row  = lookup_water_cache(conn, site_id)
-        conn.close()
     return row
+
+
+# A reading older than this is treated as unavailable rather than served as
+# "current" (e.g. a seasonal USGS sensor that stopped reporting months ago).
+STALE_READING_HOURS = float(os.environ.get("STALE_READING_HOURS", "24"))
+
+
+def _parse_utc(value: Optional[str]) -> Optional[datetime]:
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    # NOAA raw_datetime is naive GMT ("2026-10-31 18:00")
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+
+def reading_observed_at(row: sqlite3.Row) -> Optional[datetime]:
+    """When the reading was taken: the sensor timestamp if known, else fetch time."""
+    keys = row.keys()
+    observed = _parse_utc(row["raw_datetime"]) if "raw_datetime" in keys else None
+    return observed or _parse_utc(row["fetched_at"])
+
+
+def is_reading_stale(observed: Optional[datetime]) -> bool:
+    if observed is None:
+        return False
+    age_hours = (datetime.now(timezone.utc) - observed).total_seconds() / 3600
+    return age_hours > STALE_READING_HOURS
+
+
+SOURCE_LABELS = {"usgs": "usgs", "noaa": "noaa", "scrape": "seatemperature.info"}
 
 
 async def resolve_scrape(slug: str) -> Optional[sqlite3.Row]:
@@ -289,6 +328,11 @@ NOAA_MAX_DISTANCE_KM   = float(os.environ.get("NOAA_MAX_DISTANCE_KM", "80"))
 USGS_MAX_DISTANCE_KM   = float(os.environ.get("USGS_MAX_DISTANCE_KM", "50"))
 SCRAPE_MAX_DISTANCE_KM = float(os.environ.get("SCRAPE_MAX_DISTANCE_KM", "150"))
 USGS_NOAA_OVERRIDE_KM  = float(os.environ.get("USGS_NOAA_OVERRIDE_KM", "10"))
+# A government station farther than this is "regional" — a known scrape
+# location that's closer wins instead (e.g. Boston Harbor coordinates: the
+# Boston NOAA sensor is offline, so the nearest NOAA station is Providence,
+# 67 km away, while seatemperature.info's Boston page is under 1 km away).
+GOV_LOCAL_KM           = float(os.environ.get("GOV_LOCAL_KM", "5"))
 
 
 async def resolve_coordinates(lat: float, lon: float) -> tuple[str, str, float, str]:
@@ -320,15 +364,13 @@ async def resolve_coordinates(lat: float, lon: float) -> tuple[str, str, float, 
     Raises HTTPException(404) if nothing qualifies from any source.
     """
     conn = get_db()
-    noaa_candidate = find_nearest_noaa_station(conn, lat, lon, max_km=NOAA_MAX_DISTANCE_KM)
+    noaa_candidate   = find_nearest_noaa_station(conn, lat, lon, max_km=NOAA_MAX_DISTANCE_KM)
+    scrape_candidate = find_nearest_scrape_location(conn, lat, lon, max_km=SCRAPE_MAX_DISTANCE_KM)
     conn.close()
 
     usgs_candidate = find_nearest_usgs_site(lat, lon, max_km=USGS_MAX_DISTANCE_KM)
 
     if usgs_candidate is None and noaa_candidate is None:
-        conn = get_db()
-        scrape_candidate = find_nearest_scrape_location(conn, lat, lon, max_km=SCRAPE_MAX_DISTANCE_KM)
-        conn.close()
         if scrape_candidate is None:
             raise HTTPException(
                 status_code=404,
@@ -347,6 +389,12 @@ async def resolve_coordinates(lat: float, lon: float) -> tuple[str, str, float, 
     else:
         winner, source = noaa_candidate, "noaa"
 
+    if (scrape_candidate is not None
+            and winner["distance_km"] > GOV_LOCAL_KM
+            and scrape_candidate["distance_km"] < winner["distance_km"]):
+        return (scrape_candidate["slug"], "scrape",
+                scrape_candidate["distance_km"], scrape_candidate["site_name"])
+
     resolved_id = winner["station_id"] if source == "noaa" else winner["site_id"]
     return resolved_id, source, winner["distance_km"], winner["site_name"]
 
@@ -361,6 +409,7 @@ async def fishing_guide(
     location: Optional[str]   = Query(None, description="Spoken location name"),
     lat:      Optional[float] = Query(None, description="Latitude for nearest-station lookup"),
     lon:      Optional[float] = Query(None, description="Longitude for nearest-station lookup"),
+    bait_shop: bool           = Query(True, description="Look up the nearest bait shop (uses Google Places quota)"),
 ):
     if not site_id and not location and (lat is None or lon is None):
         raise HTTPException(status_code=400, detail="Provide site_id, location, or both lat and lon.")
@@ -465,6 +514,15 @@ async def fishing_guide(
     # station's real name instead.
     site_name = location.title() if location else (coord_site_name or water["site_name"])
     fetched   = water["fetched_at"]
+    observed  = reading_observed_at(water)
+    temp_source = SOURCE_LABELS.get(source, source)
+    temp_f_min = water["temp_f_min"] if "temp_f_min" in water.keys() else None
+    temp_f_max = water["temp_f_max"] if "temp_f_max" in water.keys() else None
+
+    if temp_f is not None and is_reading_stale(observed):
+        log.warning("Reading for %s is from %s — older than %sh, treating as unavailable",
+                    resolved_id, observed.isoformat(), STALE_READING_HOURS)
+        temp_f = temp_c = None
 
     if temp_f is None:
         # Primary source has no temperature — try seatemperature.info as fallback
@@ -474,6 +532,10 @@ async def fishing_guide(
             temp_f    = fallback["temp_f"]
             temp_c    = fallback["temp_c"]
             fetched   = datetime.now(timezone.utc).isoformat()
+            observed  = datetime.now(timezone.utc)
+            temp_source = "seatemperature.info"
+            temp_f_min  = fallback.get("temp_f_min")
+            temp_f_max  = fallback.get("temp_f_max")
         else:
             return FishingGuideResponse(
                 site_id         = resolved_id,
@@ -485,6 +547,7 @@ async def fishing_guide(
                 sponsor_script  = "",
                 distance_km     = distance_km,
                 resolved_via    = resolved_via,
+                source          = temp_source,
             )
 
     # ── Tides, species, fishing logic ────────────────────────────────────────
@@ -514,7 +577,7 @@ async def fishing_guide(
         build_shopping_directive(logic["secondary_asin"])
         if logic and logic["secondary_asin"] else None
     )
-    nearby_shop         = lookup_bait_shop(resolved_id) if ENABLE_BAIT_SHOP else None
+    nearby_shop         = lookup_bait_shop(resolved_id) if (ENABLE_BAIT_SHOP and bait_shop) else None
     spoken              = build_spoken_response(
         site_name, temp_f, temp_c, logic, tide_rows, sponsor_script, species_list,
         shop=nearby_shop,
@@ -525,8 +588,8 @@ async def fishing_guide(
         site_name           = site_name,
         temp_f              = temp_f,
         temp_c              = temp_c,
-        temp_f_min          = water["temp_f_min"] if "temp_f_min" in water.keys() else None,
-        temp_f_max          = water["temp_f_max"] if "temp_f_max" in water.keys() else None,
+        temp_f_min          = temp_f_min,
+        temp_f_max          = temp_f_max,
         data_freshness      = fetched,
         spoken_response     = spoken,
         sponsor_script      = sponsor_script,
@@ -539,6 +602,8 @@ async def fishing_guide(
         species             = species_list if species_list else None,
         distance_km         = distance_km,
         resolved_via        = resolved_via,
+        source              = temp_source,
+        observed_at         = observed.astimezone(timezone.utc).isoformat() if observed else None,
     )
 
 
@@ -744,7 +809,7 @@ async def get_water_conditions(location: str = "", latitude: Optional[float] = N
     if not location and not has_coords:
         return json.dumps({"error": "Provide location, or both latitude and longitude."})
 
-    query_params = {"location": location} if location else {"lat": latitude, "lon": longitude}
+    query_params = mcp_query_params(location, latitude, longitude)
     log_key = location or f"{latitude},{longitude}"
 
     import httpx
@@ -764,36 +829,8 @@ async def get_water_conditions(location: str = "", latitude: Optional[float] = N
         _log_tool_call(log_key, None, None, None, success=False, error=str(e))
         return json.dumps({"error": str(e)})
 
-    tides = data.get("tides") or []
-    tide_list = [
-        {
-            "type":      "high" if t["tide_type"] == "H" else "low",
-            "time":      t["tide_time"].split(" ")[-1] if " " in t["tide_time"] else t["tide_time"],
-            "height_ft": t["height_ft"],
-        }
-        for t in tides
-    ]
-
-    site_id = str(data.get("site_id", ""))
-    if site_id.isdigit() and len(site_id) == 7:
-        source = "noaa"
-    elif site_id.isdigit() and len(site_id) >= 8:
-        source = "usgs"
-    else:
-        source = "seatemperature.info"
-
-    result = {
-        "location":       data.get("site_name", log_key),
-        "temp_f":         data.get("temp_f"),
-        "temp_c":         data.get("temp_c"),
-        "temp_f_min":     data.get("temp_f_min"),
-        "temp_f_max":     data.get("temp_f_max"),
-        "source":         source,
-        "tides":          tide_list if tide_list else None,
-        "data_freshness": data.get("data_freshness"),
-        "distance_km":    data.get("distance_km"),
-    }
-    result = {k: v for k, v in result.items() if v is not None}
+    result = format_conditions(data, log_key)
+    source = result.get("source")
     _log_tool_call(log_key, result.get("location"), result.get("temp_f"), source, success=True)
     return json.dumps(result, indent=2)
 

@@ -162,3 +162,32 @@ def test_scrape_temperature_full_path(httpx_mock: HTTPXMock):
     result = scrape_temperature("ocean-city", full_path=full_path)
     assert result is not None
     assert result["temp_c"] == pytest.approx(20.0, abs=0.01)
+
+
+# ---------------------------------------------------------------------------
+# "today is" sentence — beats unrelated degree values in page copy
+# ---------------------------------------------------------------------------
+
+LAKE_RANGE_HTML = """<html><body><p>Water temperature all along the Lake Geneva coast is not yet
+warm enough for swimming and does not exceed 20&deg;C. <strong>The warmest water temperature
+Lake Geneva today is 14.3&deg;C</strong> (in Coppet, Switzerland), and the coldest Lake Geneva
+surface temperature now is 13.9&deg;C (in Evian-les-Bains, France).</p></body></html>"""
+
+POINT_HTML = """<html><body><p>Current ocean temperature in Boston</p><p>Water temperature in
+Boston today is 55.8&deg;F. Based on our historical data over a period of ten years, the warmest
+water in this day was recorded in 2023 and was 57&deg;F.</p></body></html>"""
+
+
+def test_extract_temperature_ignores_decoy_and_reads_range():
+    from ingest.sea_temp_scraper import extract_temperature
+    result = extract_temperature(LAKE_RANGE_HTML)
+    assert result["temp_f_max"] == pytest.approx(57.7, abs=0.1)   # 14.3°C
+    assert result["temp_f_min"] == pytest.approx(57.0, abs=0.1)   # 13.9°C
+    assert result["temp_c"] == pytest.approx(14.1, abs=0.1)       # not the decoy 20°C
+
+
+def test_extract_temperature_point_sentence_fahrenheit():
+    from ingest.sea_temp_scraper import extract_temperature
+    result = extract_temperature(POINT_HTML)
+    assert result["temp_f"] == pytest.approx(55.8)
+    assert "temp_f_min" not in result

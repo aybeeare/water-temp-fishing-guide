@@ -101,6 +101,7 @@ When a location slug maps to multiple options (e.g., `"ocean-city"` → MD or NJ
 - **`location_aliases`** — 170+ mappings of spoken names → `(site_id, source)`; this is what determines which API gets called
 - **`tide_cache`** — daily high/low predictions; cleared and rewritten each day
 - **`site_species`** — maps station IDs to fish species present (influences which fishing_logic row wins)
+- **`noaa_station_index` / `usgs_site_index` / `scrape_location_index`** — local spatial indexes for lat/lon lookups; refresh with `python -m ingest.noaa_station_index`, `python -m ingest.usgs_site_index`, `python -m ingest.scrape_location_index` (the last needs `GOOGLE_PLACES_API_KEY`). Audit the scrape index with `scripts/audit_scrape_index.py`
 - **`bait_shop_cache`** — nearest tackle shop per station, daily TTL, driven by `ingest/places_ingest.py`
 
 ## Testing Notes

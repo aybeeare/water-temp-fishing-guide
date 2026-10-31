@@ -96,9 +96,60 @@ def parse_temperature(text: str) -> Optional[dict]:
     return None
 
 
+def _to_temps(value: str, unit: str) -> dict:
+    v = float(value)
+    if unit.upper() == "C":
+        return {"temp_c": round(v, 2), "temp_f": celsius_to_fahrenheit(v)}
+    return {"temp_f": round(v, 1), "temp_c": round((v - 32) * 5 / 9, 2)}
+
+
+_NUM_UNIT = r"(\d{1,3}(?:\.\d+)?)\s*°\s*([CF])\b"
+
+# Large-lake hub pages: "The warmest water temperature in Lake Michigan today is
+# 60.4°F (Chicago), and the coldest temperature is 50.7°F (Sturgeon Bay)."
+_TODAY_RANGE_RE = re.compile(
+    r"warmest water temperature\s[^°]{0,80}?today is " + _NUM_UNIT +
+    r".{0,200}?coldest\s[^°]{0,80}?\bis " + _NUM_UNIT,
+    re.IGNORECASE | re.DOTALL,
+)
+# Single-point pages: "Water temperature in Boston today is 55.8°F."
+_TODAY_POINT_RE = re.compile(
+    r"water temperature in\s[^°]{1,80}?today is " + _NUM_UNIT,
+    re.IGNORECASE,
+)
+
+
+def extract_today_sentence(body_text: str) -> Optional[dict]:
+    """Read the site's own "today is N°" sentence.
+
+    Checked before the generic strategies: those take the first degree value
+    on the page, which can be unrelated copy such as "does not exceed 20°C".
+    """
+    m = _TODAY_RANGE_RE.search(body_text)
+    if m:
+        warm = _to_temps(m.group(1), m.group(2))
+        cold = _to_temps(m.group(3), m.group(4))
+        avg_f = round((warm["temp_f"] + cold["temp_f"]) / 2, 1)
+        return {
+            "temp_f":     avg_f,
+            "temp_c":     round((avg_f - 32) * 5 / 9, 2),
+            "temp_f_min": cold["temp_f"],
+            "temp_f_max": warm["temp_f"],
+        }
+    m = _TODAY_POINT_RE.search(body_text)
+    if m:
+        return _to_temps(m.group(1), m.group(2))
+    return None
+
+
 def extract_temperature(html: str) -> Optional[dict]:
-    """Three-strategy extraction matching the original Node.js waterScraper logic."""
+    """Multi-strategy extraction; the site's "today is" sentence wins when present."""
     soup = BeautifulSoup(html, "html.parser")
+
+    # Strategy 0 — the page's own "today is N°" sentence
+    result = extract_today_sentence(soup.get_text(" ", strip=True))
+    if result:
+        return result
 
     # Strategy 1 — explicit CSS selectors
     for selector in [
