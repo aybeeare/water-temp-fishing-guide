@@ -164,8 +164,8 @@ CREATE TABLE IF NOT EXISTS api_call_log (
 );
 
 -- ── tool_call_log ─────────────────────────────────────────────────────────────
--- One row per MCP tool invocation — logged by get_water_conditions.
--- success: 1 = returned data, 0 = error response
+-- Superseded by query_log in the separate log DB (api/query_log.py); kept so
+-- existing databases still match the schema. Nothing writes to it any more.
 CREATE TABLE IF NOT EXISTS tool_call_log (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     called_at   TEXT    NOT NULL,   -- ISO-8601 UTC

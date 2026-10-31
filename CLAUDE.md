@@ -51,6 +51,8 @@ Full deployment details live in `deployments/alexa.md` and `deployments/mcp.md`.
 | `USGS_API_KEY` | `DEMO_KEY` | Set for production throughput |
 | `FASTAPI_URL` | — | Required in Lambda and MCP server env |
 | `ENABLE_BAIT_SHOP` | `true` | Set `false` for MCP/agent deployments to save Places quota |
+| `LOG_DB_PATH` | `$RAILWAY_VOLUME_MOUNT_PATH/query_log.db`, else `query_log.db` | Permanent query log, kept out of `fishing.db` (rebuilt from git on each deploy) |
+| `ACTIVITY_API_KEY` | — | Guards `/activity` (query log summary / CSV export) |
 
 ## Architecture
 
@@ -102,6 +104,7 @@ When a location slug maps to multiple options (e.g., `"ocean-city"` → MD or NJ
 - **`tide_cache`** — daily high/low predictions; cleared and rewritten each day
 - **`site_species`** — maps station IDs to fish species present (influences which fishing_logic row wins)
 - **`noaa_station_index` / `usgs_site_index` / `scrape_location_index`** — local spatial indexes for lat/lon lookups; refresh with `python -m ingest.noaa_station_index`, `python -m ingest.usgs_site_index`, `python -m ingest.scrape_location_index` (the last needs `GOOGLE_PLACES_API_KEY`). Audit the scrape index with `scripts/audit_scrape_index.py`
+- **`query_log`** (separate DB, `api/query_log.py`) — one row per `/fishing-guide` request; channel comes from `?client=` or the User-Agent. Read via `/activity` or `scripts/activity.py`
 - **`bait_shop_cache`** — nearest tackle shop per station, daily TTL, driven by `ingest/places_ingest.py`
 
 ## Testing Notes

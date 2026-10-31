@@ -37,19 +37,27 @@ priority footprint well. Everything else stays on the geocoding +
 seatemperature.info fallback until/unless a specific region's sensor network
 turns out to be worth the integration effort.
 
-## Checking MCP activity (owner only)
+## Query log (owner only)
 
-Every call to the `get_water_conditions` tool is logged in the database. To pull a summary from the live server:
+Every `/fishing-guide` request is logged with its channel (`alexa`, `mcp-http`,
+`mcp-stdio` or `rest`), the MCP client name when known, what was asked, what it
+resolved to, the outcome and the latency. The log is a separate SQLite file
+(`api/query_log.py`), not `fishing.db`, because `fishing.db` is rebuilt from git
+on every deploy.
 
-**1. One-time setup** — set `ACTIVITY_API_KEY` in Railway (already done). Note the value somewhere safe.
+**1. One-time setup on Railway**
+- Attach a volume to the service (any mount path, e.g. `/data`). The log goes to
+  `$RAILWAY_VOLUME_MOUNT_PATH/query_log.db` automatically. Without a volume the
+  log is wiped on every deploy and the server logs a warning at startup.
+- `ACTIVITY_API_KEY` is already set. Note the value somewhere safe.
 
-**2. Run the activity script** — open a terminal in this project folder and run these two commands:
+**2. Read it** — open a terminal in this project folder:
 
 ```powershell
 $env:ACTIVITY_API_KEY="your-secret-here"
-python scripts/activity.py
+python scripts/activity.py                          # last 7 days: counts + last 50 calls
+python scripts/activity.py --days 30 --channel alexa
+python scripts/activity.py --days 3650 --csv query_log.csv   # download every row
 ```
 
-This prints total calls, unique locations queried, success rate, and the last 50 individual calls with timestamps and temperatures.
-
-The `$env:` line only needs to be run once per terminal session. After that you can re-run `python scripts/activity.py` as many times as you like.
+The `$env:` line only needs to be run once per terminal session.

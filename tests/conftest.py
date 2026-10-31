@@ -86,3 +86,22 @@ def patch_db(seeded_db, monkeypatch):
     monkeypatch.setattr(usgs_index,  "DB_PATH", seeded_db)
     monkeypatch.setattr(api_main,    "DB_PATH", seeded_db)
     return seeded_db
+
+
+@pytest.fixture(autouse=True)
+def isolated_query_log(tmp_path, monkeypatch):
+    """Point the query log at a temp file so tests never write query_log.db in the repo."""
+    import api.query_log as query_log
+    path = str(tmp_path / "query_log.db")
+    monkeypatch.setattr(query_log, "LOG_DB_PATH", path)
+    return path
+
+
+@pytest.fixture(autouse=True, scope="session")
+def session_query_log(tmp_path_factory):
+    """Covers module-scoped clients that start the app before per-test fixtures run."""
+    import api.query_log as query_log
+    original = query_log.LOG_DB_PATH
+    query_log.LOG_DB_PATH = str(tmp_path_factory.mktemp("logs") / "query_log.db")
+    yield
+    query_log.LOG_DB_PATH = original

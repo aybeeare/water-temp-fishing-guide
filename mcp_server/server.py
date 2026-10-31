@@ -122,7 +122,8 @@ async def _get_water_conditions(arguments: dict) -> list[types.TextContent]:
 
     log_key = location or f"{latitude},{longitude}"
 
-    data, err = await _fetch(f"{FASTAPI_URL}/fishing-guide", query_params(location, latitude, longitude))
+    params = query_params(location, latitude, longitude, client="mcp-stdio", agent=_client_name())
+    data, err = await _fetch(f"{FASTAPI_URL}/fishing-guide", params)
     if err:
         return [_error(err)]
 
@@ -148,6 +149,15 @@ async def _fetch(url: str, params: dict) -> tuple[dict, str]:
             return {}, "Request timed out — the data source may be temporarily slow"
         except Exception as e:
             return {}, f"Request failed: {type(e).__name__}"
+
+
+def _client_name() -> str | None:
+    """Name the host reported at initialize (e.g. 'claude-ai'), for the backend's query log."""
+    try:
+        info = server.request_context.session.client_params.clientInfo
+        return f"{info.name}/{info.version}" if info.version else info.name
+    except Exception:
+        return None
 
 
 def _error(msg: str) -> types.TextContent:

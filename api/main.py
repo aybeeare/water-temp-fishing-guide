@@ -19,13 +19,17 @@ import re
 import sqlite3
 import logging
 import json
+import csv
+import io
+import time
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone, date
+from datetime import datetime, timedelta, timezone, date
 from typing import Optional
 
-from fastapi import FastAPI, Header, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query, Request
+from fastapi.responses import Response
 from pydantic import BaseModel
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import Context, FastMCP
 
 from ingest.usgs_ingest import run_ingest, find_nearest_usgs_site
 from ingest.noaa_ingest import (
@@ -45,6 +49,7 @@ from ingest.sea_temp_scraper import (
 )
 from ingest.places_ingest import lookup_bait_shop, format_shop_speech
 from mcp_server.formatting import format_conditions, query_params as mcp_query_params
+from api import query_log
 
 log = logging.getLogger("uvicorn.error")
 
@@ -54,6 +59,7 @@ _fastmcp = FastMCP("water-conditions", host="0.0.0.0")
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
+    query_log.init_log_db()
     async with _fastmcp.session_manager.run():
         yield
 
@@ -405,12 +411,62 @@ async def resolve_coordinates(lat: float, lon: float) -> tuple[str, str, float, 
 
 @app.get("/fishing-guide", response_model=FishingGuideResponse)
 async def fishing_guide(
+    request:  Request,
     site_id:  Optional[str]   = Query(None, description="Station ID (USGS or NOAA)"),
     location: Optional[str]   = Query(None, description="Spoken location name"),
     lat:      Optional[float] = Query(None, description="Latitude for nearest-station lookup"),
     lon:      Optional[float] = Query(None, description="Longitude for nearest-station lookup"),
     bait_shop: bool           = Query(True, description="Look up the nearest bait shop (uses Google Places quota)"),
+    client:   Optional[str]   = Query(None, description="Caller channel for the query log: alexa | mcp-http | mcp-stdio | rest"),
+    agent:    Optional[str]   = Query(None, description="MCP client name, for the query log"),
 ):
+    """Answers the request and records it in the permanent query log."""
+    user_agent = request.headers.get("user-agent")
+    entry = {
+        "channel":       query_log.infer_channel(client, user_agent),
+        "agent":         agent[:100] if agent else None,
+        "user_agent":    user_agent[:200] if user_agent else None,
+        "query":         location,
+        "lat":           lat,
+        "lon":           lon,
+        "site_id_query": site_id,
+    }
+    started = time.monotonic()
+    try:
+        resp = await _fishing_guide(site_id, location, lat, lon, bait_shop)
+    except HTTPException as exc:
+        outcome = {400: "bad_request", 404: "not_found"}.get(exc.status_code, "error")
+        query_log.record(**entry, outcome=outcome, status_code=exc.status_code,
+                         error=str(exc.detail)[:300], latency_ms=_elapsed_ms(started))
+        raise
+    except Exception as exc:
+        query_log.record(**entry, outcome="error", status_code=500,
+                         error=f"{type(exc).__name__}: {exc}"[:300], latency_ms=_elapsed_ms(started))
+        raise
+
+    if resp.disambiguation:
+        outcome = "clarification"
+    elif resp.temp_f is None:
+        outcome = "no_reading"
+    else:
+        outcome = "ok"
+    query_log.record(
+        **entry,
+        resolved_via=resp.resolved_via, site_id=resp.site_id, resolved_to=resp.site_name,
+        source=resp.source, temp_f=resp.temp_f, distance_km=resp.distance_km,
+        outcome=outcome, status_code=200, latency_ms=_elapsed_ms(started),
+    )
+    return resp
+
+
+def _elapsed_ms(started: float) -> int:
+    return int((time.monotonic() - started) * 1000)
+
+
+async def _fishing_guide(
+    site_id: Optional[str], location: Optional[str], lat: Optional[float],
+    lon: Optional[float], bait_shop: bool,
+) -> FishingGuideResponse:
     if not site_id and not location and (lat is None or lon is None):
         raise HTTPException(status_code=400, detail="Provide site_id, location, or both lat and lon.")
 
@@ -711,69 +767,74 @@ async def health():
 
 
 # ---------------------------------------------------------------------------
-# Activity summary — owner-only endpoint, key-guarded
+# Activity — owner-only view of the query log, key-guarded
 # ---------------------------------------------------------------------------
 
 @app.get("/activity", include_in_schema=False)
-async def activity(x_activity_key: Optional[str] = Header(None)):
+async def activity(
+    x_activity_key: Optional[str] = Header(None),
+    days:    int           = Query(7, ge=1, le=3650, description="Look-back window"),
+    channel: Optional[str] = Query(None, description="alexa | mcp-http | mcp-stdio | rest"),
+    limit:   int           = Query(50, ge=0, le=1000, description="Recent rows to include"),
+    format:  str           = Query("json", pattern="^(json|csv)$", description="csv = every row in the window"),
+):
     if not ACTIVITY_API_KEY or x_activity_key != ACTIVITY_API_KEY:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    conn  = get_db()
-    rows  = conn.execute(
-        """SELECT called_at, location, resolved_to, temp_f, source, success, error
-           FROM tool_call_log ORDER BY called_at DESC LIMIT 500"""
-    ).fetchall()
-    conn.close()
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    where, args = "called_at >= ?", [since]
+    if channel:
+        where += " AND channel = ?"
+        args.append(channel)
 
-    total    = len(rows)
-    success  = sum(1 for r in rows if r["success"])
-    loc_hits: dict[str, int] = {}
-    for r in rows:
-        key = r["resolved_to"] or r["location"]
-        loc_hits[key] = loc_hits.get(key, 0) + 1
-
-    return {
-        "total_calls":       total,
-        "unique_locations":  len(loc_hits),
-        "success_rate":      f"{success}/{total}",
-        "top_locations":     sorted(loc_hits.items(), key=lambda x: -x[1])[:15],
-        "recent":            [dict(r) for r in rows[:50]],
-    }
-
-
-# ---------------------------------------------------------------------------
-# Activity log — append-only record of every MCP tool invocation
-# ---------------------------------------------------------------------------
-
-def _log_tool_call(
-    location: str,
-    resolved_to: Optional[str],
-    temp_f: Optional[float],
-    source: Optional[str],
-    success: bool,
-    error: Optional[str] = None,
-) -> None:
+    conn = query_log.connect()
     try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.execute(
-            """INSERT INTO tool_call_log
-               (called_at, location, resolved_to, temp_f, source, success, error)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (
-                datetime.now(timezone.utc).isoformat(),
-                location,
-                resolved_to,
-                temp_f,
-                source,
-                1 if success else 0,
-                error,
-            ),
-        )
-        conn.commit()
+        if format == "csv":
+            rows = conn.execute(
+                f"SELECT id, {', '.join(query_log.COLUMNS)} FROM query_log WHERE {where} ORDER BY id",
+                args,
+            ).fetchall()
+            buf = io.StringIO()
+            writer = csv.writer(buf)
+            writer.writerow(["id", *query_log.COLUMNS])
+            writer.writerows([tuple(r) for r in rows])
+            return Response(
+                buf.getvalue(), media_type="text/csv",
+                headers={"Content-Disposition": f'attachment; filename="query_log_{days}d.csv"'},
+            )
+
+        def grouped(col: str, n: int = 15) -> dict:
+            return {
+                (r[0] if r[0] is not None else "(none)"): r[1]
+                for r in conn.execute(
+                    f"SELECT {col}, COUNT(*) FROM query_log WHERE {where} "
+                    f"GROUP BY {col} ORDER BY COUNT(*) DESC LIMIT {n}",
+                    args,
+                )
+            }
+
+        total = conn.execute(f"SELECT COUNT(*) FROM query_log WHERE {where}", args).fetchone()[0]
+        all_time = conn.execute("SELECT COUNT(*), MIN(called_at) FROM query_log").fetchone()
+        recent = conn.execute(
+            f"SELECT {', '.join(query_log.COLUMNS)} FROM query_log WHERE {where} "
+            "ORDER BY id DESC LIMIT ?",
+            [*args, limit],
+        ).fetchall()
+        return {
+            "window_days":      days,
+            "total_calls":      total,
+            "by_channel":       grouped("channel"),
+            "by_outcome":       grouped("outcome"),
+            "by_agent":         grouped("agent"),
+            "top_queries":      grouped("COALESCE(query, site_id_query, lat || ',' || lon)"),
+            "top_resolved":     grouped("resolved_to"),
+            "all_time_calls":   all_time[0],
+            "logging_since":    all_time[1],
+            "log_db":           query_log.LOG_DB_PATH,
+            "recent":           [dict(r) for r in recent],
+        }
+    finally:
         conn.close()
-    except Exception:
-        pass
 
 
 # ---------------------------------------------------------------------------
@@ -796,7 +857,8 @@ def _log_tool_call(
     )
 )
 async def get_water_conditions(location: str = "", latitude: Optional[float] = None,
-                                longitude: Optional[float] = None) -> str:
+                                longitude: Optional[float] = None,
+                                ctx: Optional[Context] = None) -> str:
     """
     location: Water body name as natural language. Examples: 'Lake Michigan',
     'Revere Beach', 'Chesapeake Bay', 'Galveston Island', 'Puget Sound',
@@ -809,7 +871,9 @@ async def get_water_conditions(location: str = "", latitude: Optional[float] = N
     if not location and not has_coords:
         return json.dumps({"error": "Provide location, or both latitude and longitude."})
 
-    query_params = mcp_query_params(location, latitude, longitude)
+    # The /fishing-guide call below records this request in the query log.
+    query_params = mcp_query_params(location, latitude, longitude,
+                                    client="mcp-http", agent=_mcp_client_name(ctx))
     log_key = location or f"{latitude},{longitude}"
 
     import httpx
@@ -818,21 +882,24 @@ async def get_water_conditions(location: str = "", latitude: Optional[float] = N
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.get(f"{base}/fishing-guide", params=query_params)
             if resp.status_code == 404:
-                _log_tool_call(log_key, None, None, None, success=False, error="location not found")
                 return json.dumps({"error": f"Location not found: {log_key}. Try a more specific name or nearby coordinates."})
             resp.raise_for_status()
             data = resp.json()
     except httpx.TimeoutException:
-        _log_tool_call(log_key, None, None, None, success=False, error="timeout")
         return json.dumps({"error": "Request timed out — data source temporarily slow, try again"})
     except Exception as e:
-        _log_tool_call(log_key, None, None, None, success=False, error=str(e))
         return json.dumps({"error": str(e)})
 
-    result = format_conditions(data, log_key)
-    source = result.get("source")
-    _log_tool_call(log_key, result.get("location"), result.get("temp_f"), source, success=True)
-    return json.dumps(result, indent=2)
+    return json.dumps(format_conditions(data, log_key), indent=2)
+
+
+def _mcp_client_name(ctx: Optional[Context]) -> Optional[str]:
+    """Name the connected MCP client reported at initialize, e.g. 'claude-ai'."""
+    try:
+        info = ctx.session.client_params.clientInfo
+        return f"{info.name}/{info.version}" if info.version else info.name
+    except Exception:
+        return None
 
 
 app.mount("/", _fastmcp.streamable_http_app())

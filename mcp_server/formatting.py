@@ -10,9 +10,12 @@ from typing import Optional
 QUERY_EXTRAS = {"bait_shop": "false"}
 
 
-def query_params(location: str, latitude: Optional[float], longitude: Optional[float]) -> dict:
+def query_params(location: str, latitude: Optional[float], longitude: Optional[float],
+                 client: Optional[str] = None, agent: Optional[str] = None) -> dict:
+    """client/agent tag the request in the backend's query log."""
     base = {"location": location} if location else {"lat": latitude, "lon": longitude}
-    return {**base, **QUERY_EXTRAS}
+    tags = {k: v for k, v in (("client", client), ("agent", agent)) if v}
+    return {**base, **QUERY_EXTRAS, **tags}
 
 
 def source_label(data: dict) -> str:
