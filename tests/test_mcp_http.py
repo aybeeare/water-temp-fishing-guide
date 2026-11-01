@@ -307,6 +307,70 @@ def test_tools_call_backend_404_returns_error(mcp_client, httpx_mock):
 
 
 # ---------------------------------------------------------------------------
+# Output schema — callers type-check structuredContent against it
+# ---------------------------------------------------------------------------
+
+def _rpc(client: TestClient, method: str, params: dict | None = None) -> dict:
+    session_id = _do_initialize(client)
+    body = {"jsonrpc": "2.0", "id": 9, "method": method}
+    if params is not None:
+        body["params"] = params
+    resp = client.post("/mcp", json=body, headers={**MCP_HEADERS, "mcp-session-id": session_id})
+    assert resp.status_code == 200
+    return _parse_sse(resp.content)[0]["result"]
+
+
+def _tool(client: TestClient) -> dict:
+    return _rpc(client, "tools/list")["tools"][0]
+
+
+def test_tools_list_declares_typed_output_schema(mcp_client):
+    schema = _tool(mcp_client)["outputSchema"]
+    assert schema["type"] == "object"
+    assert {"temp_f", "source", "tides", "observed_at", "needs_clarification", "options"} <= set(schema["properties"])
+    assert "result" not in schema["properties"]   # not FastMCP's generic string wrapper
+
+
+def test_tools_list_declares_annotations_and_param_descriptions(mcp_client):
+    tool = _tool(mcp_client)
+    assert tool["annotations"]["readOnlyHint"] is True
+    assert tool["annotations"]["openWorldHint"] is True
+    for name in ("location", "latitude", "longitude"):
+        assert tool["inputSchema"]["properties"][name]["description"]
+
+
+def test_tools_call_structured_content_matches_schema(mcp_client, httpx_mock):
+    import jsonschema
+    schema = _tool(mcp_client)["outputSchema"]
+    httpx_mock.add_response(json=FAKE_FISHING_RESPONSE)
+    result = _rpc(mcp_client, "tools/call",
+                  {"name": "get_water_conditions", "arguments": {"location": "boston harbor"}})
+    assert not result.get("isError")
+    jsonschema.validate(result["structuredContent"], schema)
+    assert json.loads(result["content"][0]["text"]) == result["structuredContent"]
+
+
+def test_tools_call_error_is_flagged(mcp_client, httpx_mock):
+    httpx_mock.add_response(status_code=404, text="Not found")
+    result = _rpc(mcp_client, "tools/call",
+                  {"name": "get_water_conditions", "arguments": {"location": "nowhere lake"}})
+    assert result["isError"] is True
+    assert "not found" in result["content"][0]["text"].lower()
+
+
+def test_tools_call_missing_arguments_is_flagged(mcp_client):
+    result = _rpc(mcp_client, "tools/call", {"name": "get_water_conditions", "arguments": {}})
+    assert result["isError"] is True
+
+
+def test_server_card_matches_live_tool(mcp_client):
+    card = mcp_client.get("/.well-known/mcp/server-card.json").json()
+    [tool] = card["tools"]
+    assert tool["outputSchema"] == _tool(mcp_client)["outputSchema"]
+    assert tool["annotations"]["readOnlyHint"] is True
+
+
+# ---------------------------------------------------------------------------
 # Integration — live Railway server
 # Run with: pytest -m integration
 # ---------------------------------------------------------------------------

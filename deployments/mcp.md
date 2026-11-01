@@ -65,7 +65,17 @@ FASTAPI_URL=https://water-temp-fishing-guide-production.up.railway.app python mc
 The MCP server calls `/fishing-guide` with `bait_shop=false`, so agent
 queries never spend Google Places quota (Alexa queries still get the shop).
 
-`get_water_conditions` returns:
+The tool declares an `outputSchema` (the `WaterConditions` model in
+`mcp_server/formatting.py`), and every successful result carries a matching
+`structuredContent` object, plus the same JSON as text for older clients. It
+also declares `readOnlyHint`/`idempotentHint`/`openWorldHint` annotations. The
+hosted endpoint, the stdio package and `/.well-known/mcp/server-card.json` all
+use those same definitions.
+
+Failures (location not found, missing arguments, backend timeout) are
+`isError: true` results with a plain-text message and no `structuredContent`.
+
+A successful `get_water_conditions` result:
 ```json
 {
   "location": "Chesapeake Bay",
@@ -94,7 +104,8 @@ Ambiguous names return a clarification instead of data:
 {
   "needs_clarification": true,
   "message": "'Ocean City' matches more than one place. Ask the user which one they mean, then call get_water_conditions again with that option as location.",
-  "options": ["Ocean City, Maryland", "Ocean City, New Jersey"]
+  "options": ["Ocean City, Maryland", "Ocean City, New Jersey"],
+  "tides": []
 }
 ```
 

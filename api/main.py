@@ -18,18 +18,19 @@ import os
 import re
 import sqlite3
 import logging
-import json
 import csv
 import io
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone, date
-from typing import Optional
+from typing import Annotated, Optional
 
 from fastapi import FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.fastmcp.exceptions import ToolError
+from mcp.types import CallToolResult
 
 from ingest.usgs_ingest import run_ingest, find_nearest_usgs_site
 from ingest.noaa_ingest import (
@@ -48,7 +49,7 @@ from ingest.sea_temp_scraper import (
     get_disambiguation_options,
 )
 from ingest.places_ingest import lookup_bait_shop, format_shop_speech
-from mcp_server.formatting import format_conditions, query_params as mcp_query_params
+from mcp_server import formatting as mcp_tool
 from api import query_log
 
 log = logging.getLogger("uvicorn.error")
@@ -64,7 +65,7 @@ async def _lifespan(app: FastAPI):
         yield
 
 
-app = FastAPI(title="Fishing Water Temp — Alexa+ AI Action API", version="1.2.0", lifespan=_lifespan)
+app = FastAPI(title="Fishing Water Temp — Alexa+ AI Action API", version="1.3.0", lifespan=_lifespan)
 
 DB_PATH                = os.environ.get("DB_PATH", "fishing.db")
 ASSOCIATES_TRACKING_ID = os.environ.get("ASSOCIATES_TRACKING_ID", "yourstore-20")
@@ -688,43 +689,19 @@ async def mcp_server_card():
     return {
         "serverInfo": {
             "name": "water-conditions",
-            "version": "1.0.0",
+            "version": app.version,
         },
         "authentication": {
             "required": False,
         },
         "tools": [
             {
-                "name": "get_water_conditions",
-                "description": (
-                    "Get real-time water temperature and tide prediction data for any lake, river, "
-                    "ocean, bay, or beach by name or latitude/longitude coordinates. Data sourced "
-                    "live from NOAA CO-OPS, USGS, and seatemperature.info — not from training data — "
-                    "with automatic nearest-station matching for coordinate inputs. Coverage includes "
-                    "8,000+ named locations across North America and major international bodies, "
-                    "with string to coordinate geocoding for fallback."
-                ),
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "location": {
-                            "type": "string",
-                            "description": (
-                                "Water body name as natural language. Examples: 'Lake Michigan', "
-                                "'Revere Beach', 'Chesapeake Bay', 'Galveston Island', 'Puget Sound'. "
-                                "Provide this OR latitude+longitude."
-                            ),
-                        },
-                        "latitude": {
-                            "type": "number",
-                            "description": "Latitude, for nearest-station lookup when no location name is available. Requires longitude.",
-                        },
-                        "longitude": {
-                            "type": "number",
-                            "description": "Longitude, for nearest-station lookup when no location name is available. Requires latitude.",
-                        },
-                    },
-                },
+                "name":         mcp_tool.TOOL_NAME,
+                "title":        mcp_tool.TOOL_ANNOTATIONS.title,
+                "description":  mcp_tool.TOOL_DESCRIPTION,
+                "inputSchema":  mcp_tool.INPUT_SCHEMA,
+                "outputSchema": mcp_tool.OUTPUT_SCHEMA,
+                "annotations":  mcp_tool.TOOL_ANNOTATIONS.model_dump(exclude_none=True),
             }
         ],
         "resources": [],
@@ -844,53 +821,27 @@ async def activity(
 # ---------------------------------------------------------------------------
 
 @_fastmcp.tool(
-    description=(
-        "Get real-time water temperature and tide prediction data for any lake, river, "
-        "ocean, bay, or beach by name or latitude/longitude coordinates. Data sourced "
-        "live from NOAA CO-OPS, USGS, and seatemperature.info — not from training data — "
-        "with automatic nearest-station matching for coordinate inputs. Coverage includes "
-        "8,000+ named locations across North America and major international bodies, "
-        "with string to coordinate geocoding for fallback. "
-        "Use this whenever a user asks about current water temperature, beach or "
-        "swimming conditions, boating, surfing, fishing, tide times, or any question "
-        "requiring real-time water data."
-    )
+    name=mcp_tool.TOOL_NAME,
+    title=mcp_tool.TOOL_ANNOTATIONS.title,
+    description=mcp_tool.TOOL_DESCRIPTION,
+    annotations=mcp_tool.TOOL_ANNOTATIONS,
 )
-async def get_water_conditions(location: str = "", latitude: Optional[float] = None,
-                                longitude: Optional[float] = None,
-                                ctx: Optional[Context] = None) -> str:
-    """
-    location: Water body name as natural language. Examples: 'Lake Michigan',
-    'Revere Beach', 'Chesapeake Bay', 'Galveston Island', 'Puget Sound',
-    'Potomac River', 'Waikiki Beach'. Provide this OR latitude+longitude.
-
-    latitude/longitude: Coordinates for nearest-station lookup when no
-    location name is available. Both are required together.
-    """
-    has_coords = latitude is not None and longitude is not None
-    if not location and not has_coords:
-        return json.dumps({"error": "Provide location, or both latitude and longitude."})
-
-    # The /fishing-guide call below records this request in the query log.
-    query_params = mcp_query_params(location, latitude, longitude,
-                                    client="mcp-http", agent=_mcp_client_name(ctx))
-    log_key = location or f"{latitude},{longitude}"
-
-    import httpx
-    base = os.environ.get("FASTAPI_URL", "http://localhost:8000")
-    try:
-        async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.get(f"{base}/fishing-guide", params=query_params)
-            if resp.status_code == 404:
-                return json.dumps({"error": f"Location not found: {log_key}. Try a more specific name or nearby coordinates."})
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.TimeoutException:
-        return json.dumps({"error": "Request timed out — data source temporarily slow, try again"})
-    except Exception as e:
-        return json.dumps({"error": str(e)})
-
-    return json.dumps(format_conditions(data, log_key), indent=2)
+async def get_water_conditions(
+    location:  Annotated[str, Field(description=mcp_tool.LOCATION_DESCRIPTION)] = "",
+    latitude:  Annotated[Optional[float], Field(ge=-90, le=90, description=mcp_tool.LATITUDE_DESCRIPTION)] = None,
+    longitude: Annotated[Optional[float], Field(ge=-180, le=180, description=mcp_tool.LONGITUDE_DESCRIPTION)] = None,
+    ctx: Optional[Context] = None,
+) -> Annotated[CallToolResult, mcp_tool.WaterConditions]:
+    # The /fishing-guide call inside records this request in the query log.
+    result = await mcp_tool.get_conditions(
+        os.environ.get("FASTAPI_URL", "http://localhost:8000"),
+        location, latitude, longitude,
+        client="mcp-http", agent=_mcp_client_name(ctx),
+    )
+    if result.isError:
+        # FastMCP turns this into an isError result carrying the message.
+        raise ToolError(result.content[0].text)
+    return result
 
 
 def _mcp_client_name(ctx: Optional[Context]) -> Optional[str]:

@@ -97,8 +97,9 @@ async def test_handshake_step2_returns_text_content(httpx_mock: HTTPXMock):
     """call_tool() must return a list of TextContent — the MCP wire format."""
     httpx_mock.add_response(json=FAKE_API_RESPONSE)
     result = await call_tool("get_water_conditions", {"location": "boston harbor"})
-    assert len(result) == 1
-    assert result[0].type == "text"
+    assert not result.isError
+    assert len(result.content) == 1
+    assert result.content[0].type == "text"
 
 
 @pytest.mark.asyncio
@@ -106,7 +107,7 @@ async def test_handshake_step2_response_is_valid_json(httpx_mock: HTTPXMock):
     """The TextContent payload must be valid JSON the LLM can parse."""
     httpx_mock.add_response(json=FAKE_API_RESPONSE)
     result = await call_tool("get_water_conditions", {"location": "boston harbor"})
-    data = json.loads(result[0].text)
+    data = json.loads(result.content[0].text)
     assert isinstance(data, dict)
 
 
@@ -115,7 +116,7 @@ async def test_handshake_step2_alexa_fields_stripped(httpx_mock: HTTPXMock):
     """Alexa cart directives and spoken_response must not reach LLM agents."""
     httpx_mock.add_response(json=FAKE_API_RESPONSE)
     result = await call_tool("get_water_conditions", {"location": "boston harbor"})
-    data = json.loads(result[0].text)
+    data = json.loads(result.content[0].text)
     for field in ALEXA_ONLY_FIELDS:
         assert field not in data, f"Alexa field '{field}' should be stripped from MCP response"
 
@@ -125,7 +126,7 @@ async def test_handshake_step2_core_fields_present(httpx_mock: HTTPXMock):
     """Core fishing data fields must be present for the LLM to reason over."""
     httpx_mock.add_response(json=FAKE_API_RESPONSE)
     result = await call_tool("get_water_conditions", {"location": "boston harbor"})
-    data = json.loads(result[0].text)
+    data = json.loads(result.content[0].text)
     for field in ("temp_f", "temp_c", "source", "tides", "data_freshness"):
         assert field in data, f"Expected field '{field}' in MCP response"
 
@@ -134,8 +135,9 @@ async def test_handshake_step2_core_fields_present(httpx_mock: HTTPXMock):
 async def test_handshake_step2_empty_location_returns_error():
     """Empty location must return a clean error string, not raise an exception."""
     result = await call_tool("get_water_conditions", {"location": ""})
-    assert result[0].type == "text"
-    assert "error" in result[0].text.lower()
+    assert result.isError
+    assert result.structuredContent is None
+    assert "provide location" in result.content[0].text.lower()
 
 
 @pytest.mark.asyncio
@@ -149,7 +151,7 @@ async def test_handshake_step2_disambiguation_returns_options(httpx_mock: HTTPXM
         ],
     })
     result = await call_tool("get_water_conditions", {"location": "ocean city"})
-    data = json.loads(result[0].text)
+    data = json.loads(result.content[0].text)
     assert data["needs_clarification"] is True
     assert data["options"] == ["Ocean City, Maryland", "Ocean City, New Jersey"]
     request = httpx_mock.get_requests()[0]
@@ -168,8 +170,56 @@ async def test_handshake_step2_api_error_returns_message(httpx_mock: HTTPXMock):
     """If the FastAPI backend returns an error, return a readable message not a crash."""
     httpx_mock.add_response(status_code=404, text="Not found")
     result = await call_tool("get_water_conditions", {"location": "nowhere"})
-    assert result[0].type == "text"
-    assert "404" in result[0].text or "error" in result[0].text.lower()
+    assert result.isError
+    assert "not found" in result.content[0].text.lower()
+
+
+# ---------------------------------------------------------------------------
+# Output schema — callers type-check structuredContent against it
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_tool_declares_output_schema_and_annotations():
+    tool = (await list_tools())[0]
+    assert tool.outputSchema["type"] == "object"
+    assert {"temp_f", "source", "tides", "needs_clarification", "options"} <= set(tool.outputSchema["properties"])
+    assert tool.annotations.readOnlyHint is True
+    assert tool.inputSchema["properties"]["latitude"]["maximum"] == 90
+
+
+@pytest.mark.asyncio
+async def test_structured_content_matches_output_schema(httpx_mock: HTTPXMock):
+    import jsonschema
+    schema = (await list_tools())[0].outputSchema
+    httpx_mock.add_response(json=FAKE_API_RESPONSE)
+    result = await call_tool("get_water_conditions", {"location": "boston harbor"})
+    jsonschema.validate(result.structuredContent, schema)
+    assert json.loads(result.content[0].text) == result.structuredContent
+    assert result.structuredContent["temp_f"] == 58.6
+
+
+@pytest.mark.asyncio
+async def test_clarification_matches_output_schema(httpx_mock: HTTPXMock):
+    import jsonschema
+    schema = (await list_tools())[0].outputSchema
+    httpx_mock.add_response(json={**FAKE_API_RESPONSE, "temp_f": None, "disambiguation": [
+        {"label": "Ocean City, Maryland", "slug": "/a"}]})
+    result = await call_tool("get_water_conditions", {"location": "ocean city"})
+    jsonschema.validate(result.structuredContent, schema)
+    assert result.structuredContent["needs_clarification"] is True
+
+
+@pytest.mark.asyncio
+async def test_server_dispatch_validates_output(httpx_mock: HTTPXMock):
+    """Through the real request handler, which enforces the declared schema."""
+    httpx_mock.add_response(json=FAKE_API_RESPONSE)
+    from mcp_server.server import server
+    await server.request_handlers[types.ListToolsRequest](types.ListToolsRequest(method="tools/list"))
+    req = types.CallToolRequest(method="tools/call", params=types.CallToolRequestParams(
+        name="get_water_conditions", arguments={"location": "boston harbor"}))
+    res = (await server.request_handlers[types.CallToolRequest](req)).root
+    assert not res.isError
+    assert res.structuredContent["location"] == "Boston Harbor"
 
 
 # ---------------------------------------------------------------------------
@@ -190,7 +240,7 @@ async def test_mcp_integration_full_handshake():
 
     # Step 2
     result = await call_tool("get_water_conditions", {"location": "boston harbor"})
-    data = json.loads(result[0].text)
+    data = json.loads(result.content[0].text)
     assert data.get("temp_f") is not None
     for field in ALEXA_ONLY_FIELDS:
         assert field not in data

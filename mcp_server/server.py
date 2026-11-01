@@ -11,7 +11,7 @@ The FastAPI backend on Railway handles all data fetching, caching, and
 fallback logic. This server is a protocol translator: MCP in, HTTP out.
 
 Run locally:
-    pip install mcp httpx
+    pip install water-conditions-mcp
     FASTAPI_URL=https://water-temp-fishing-guide-production.up.railway.app python mcp_server/server.py
 
 Connect from Claude Desktop (~/.claude_desktop_config.json):
@@ -26,18 +26,16 @@ Connect from Claude Desktop (~/.claude_desktop_config.json):
     }
 """
 import asyncio
-import json
 import os
 
-import httpx
 import mcp.types as types
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 
 try:
-    from mcp_server.formatting import format_conditions, query_params
+    from mcp_server import formatting
 except ImportError:  # run directly as `python mcp_server/server.py`
-    from formatting import format_conditions, query_params
+    import formatting
 
 FASTAPI_URL = os.environ.get(
     "FASTAPI_URL",
@@ -52,41 +50,12 @@ server = Server("water-conditions")
 
 TOOLS = [
     types.Tool(
-        name="get_water_conditions",
-        description=(
-            "Get real-time water temperature and tide prediction data for any lake, river, "
-            "ocean, bay, or beach by name or latitude/longitude coordinates. Data sourced "
-            "live from NOAA CO-OPS, USGS, and seatemperature.info — not from training data — "
-            "with automatic nearest-station matching for coordinate inputs. Coverage includes "
-            "8,000+ named locations across North America and major international bodies, "
-            "with string to coordinate geocoding for fallback. "
-            "Use this tool whenever a user asks about: current water temperature, beach or "
-            "swimming conditions, boating conditions, surfing conditions, fishing conditions, "
-            "tide times, or any question requiring real-time water data."
-        ),
-        inputSchema={
-            "type": "object",
-            "properties": {
-                "location": {
-                    "type": "string",
-                    "description": (
-                        "Water body name as natural language. "
-                        "Examples: 'Lake Michigan', 'Revere Beach', 'Chesapeake Bay', "
-                        "'Cape Cod', 'Galveston Island', 'Puget Sound', 'Florida Keys', "
-                        "'Potomac River', 'Waikiki Beach', 'Gulf of Mexico'. "
-                        "Provide this OR latitude+longitude."
-                    ),
-                },
-                "latitude": {
-                    "type": "number",
-                    "description": "Latitude, for nearest-station lookup when no location name is available. Requires longitude.",
-                },
-                "longitude": {
-                    "type": "number",
-                    "description": "Longitude, for nearest-station lookup when no location name is available. Requires latitude.",
-                },
-            },
-        },
+        name=formatting.TOOL_NAME,
+        title="Water Conditions",
+        description=formatting.TOOL_DESCRIPTION,
+        inputSchema=formatting.INPUT_SCHEMA,
+        outputSchema=formatting.OUTPUT_SCHEMA,
+        annotations=formatting.TOOL_ANNOTATIONS,
     ),
 ]
 
@@ -101,54 +70,17 @@ async def list_tools() -> list[types.Tool]:
 
 
 @server.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
-    if name == "get_water_conditions":
-        return await _get_water_conditions(arguments)
-    raise ValueError(f"Unknown tool: {name}")
-
-
-# ---------------------------------------------------------------------------
-# get_water_conditions
-# ---------------------------------------------------------------------------
-
-async def _get_water_conditions(arguments: dict) -> list[types.TextContent]:
-    location  = arguments.get("location", "").strip()
-    latitude  = arguments.get("latitude")
-    longitude = arguments.get("longitude")
-    has_coords = latitude is not None and longitude is not None
-
-    if not location and not has_coords:
-        return [_error("Provide location, or both latitude and longitude.")]
-
-    log_key = location or f"{latitude},{longitude}"
-
-    params = query_params(location, latitude, longitude, client="mcp-stdio", agent=_client_name())
-    data, err = await _fetch(f"{FASTAPI_URL}/fishing-guide", params)
-    if err:
-        return [_error(err)]
-
-    result = format_conditions(data, log_key)
-    return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-async def _fetch(url: str, params: dict) -> tuple[dict, str]:
-    async with httpx.AsyncClient(timeout=15) as client:
-        try:
-            resp = await client.get(url, params=params)
-            if resp.status_code == 404:
-                return {}, f"Location not found. Try a more specific name or nearby location."
-            resp.raise_for_status()
-            return resp.json(), None
-        except httpx.HTTPStatusError as e:
-            return {}, f"API error {e.response.status_code}"
-        except httpx.TimeoutException:
-            return {}, "Request timed out — the data source may be temporarily slow"
-        except Exception as e:
-            return {}, f"Request failed: {type(e).__name__}"
+async def call_tool(name: str, arguments: dict) -> types.CallToolResult:
+    if name != formatting.TOOL_NAME:
+        raise ValueError(f"Unknown tool: {name}")
+    return await formatting.get_conditions(
+        FASTAPI_URL,
+        arguments.get("location", ""),
+        arguments.get("latitude"),
+        arguments.get("longitude"),
+        client="mcp-stdio",
+        agent=_client_name(),
+    )
 
 
 def _client_name() -> str | None:
@@ -158,10 +90,6 @@ def _client_name() -> str | None:
         return f"{info.name}/{info.version}" if info.version else info.name
     except Exception:
         return None
-
-
-def _error(msg: str) -> types.TextContent:
-    return types.TextContent(type="text", text=json.dumps({"error": msg}))
 
 
 # ---------------------------------------------------------------------------
